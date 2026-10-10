@@ -1,0 +1,69 @@
+# environment
+.env
+.env.local
+.env.*.local
+
+# data
+/data/
+/projects/
+*.bam
+*.bai
+*.csi
+*.cram
+*.crai
+*.sam
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.fa
+*.fa.gz
+*.fasta
+*.fasta.gz
+*.fai
+*.gzi
+*.2bit
+*.vcf.gz
+*.tbi
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.ipynb_checkpoints/
+
+# frontend (node / vite / typescript)
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+.vite/
+npm-debug.log*
+
+# editors and OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+
+# logs and scratch
+*.log
+tmp/
+scratch/
+
+# claude code local settings
+.claude/settings.local.json
