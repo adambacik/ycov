@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# cancel an older run of the same branch / PR when a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # job 1: backend
+  python:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy src
+
+      # add --cov-fail-under=70 once there is real code (NFR18)
+      - name: Test
+        run: uv run pytest --cov=ycov --cov-report=term-missing
+
+  # job 2: frontend
+  web:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # skips the job until web/ is scaffolded with Vite
+      - name: Check for frontend
+        id: check
+        run: |
+          if [ -f package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"
+          else echo "exists=false" >> "$GITHUB_OUTPUT"; echo "web/package.json not found, skipping"; fi
+
+      - name: Install Node.js
+        if: steps.check.outputs.exists == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        if: steps.check.outputs.exists == 'true'
+        run: npm ci
+
+      - name: Lint
+        if: steps.check.outputs.exists == 'true'
+        run: npm run lint
+
+      - name: Type check
+        if: steps.check.outputs.exists == 'true'
+        run: npx tsc --noEmit
+
+      - name: Test
+        if: steps.check.outputs.exists == 'true'
+        run: npm test -- --run
+
+      - name: Build
+        if: steps.check.outputs.exists == 'true'
+        run: npm run build

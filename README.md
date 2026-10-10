@@ -54,7 +54,7 @@ Every value is computed from all reads and from reads with MAPQ ≥ 20.
 
 ## Development
 
-Requirements: Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), Node.js ≥ 20.
+Requirements: Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), Node.js ≥ 22.
 
 ```bash
 git clone https://github.com/adambacik/ycov.git
