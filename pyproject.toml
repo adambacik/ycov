@@ -1,12 +1,12 @@
 [project]
 name = "ycov"
 version = "0.1.0"
-description = "Add your description here"
+description = "Visualise and compare Y chromosome coverage across many samples"
 readme = "README.md"
 authors = [
     { name = "adambacik" }
 ]
-licence = "MIT"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = []
 
@@ -19,7 +19,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "pymy>=0.0.8",
+    "mypy>=2.4.0",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "ruff>=0.17.0",
