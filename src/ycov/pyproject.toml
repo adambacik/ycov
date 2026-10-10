@@ -1,0 +1,26 @@
+[project]
+name = "ycov"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "adambacik" }
+]
+licence = "MIT"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+ycov = "ycov:main"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pymy>=0.0.8",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.0",
+]
