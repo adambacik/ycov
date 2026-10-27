@@ -24,3 +24,17 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.17.0",
 ]
+scripts = [
+    "pandas>=3.1.0",
+    "plotly>=7.1.0",
+]
+
+[tool.mypy]
+disallow_untyped_defs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+    "plotly.*"
+]
+ignore_missing_imports = true
