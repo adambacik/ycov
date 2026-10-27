@@ -32,7 +32,14 @@ def main() -> None:
         sys.exit(1)
 
     script_dir = Path(__file__).resolve().parent
-    default_out = script_dir.parent / "src" / "ycov" / "annotations" / "chm13" / "sequence_classes.bed"
+    default_out = (
+        script_dir.parent
+        / "src"
+        / "ycov"
+        / "annotations"
+        / "chm13"
+        / "sequence_classes.bed"
+    )
     out_path = Path(sys.argv[2]) if len(sys.argv) > 2 else default_out
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -50,6 +57,7 @@ def main() -> None:
     # Write BED4 (0-based, tab-separated, no header)
     df_chry.to_csv(out_path, sep="\t", index=False, header=False)
     print(f"Done! Written {len(df_chry)} sequence classes to: {out_path}")
+
 
 if __name__ == "__main__":
     main()
