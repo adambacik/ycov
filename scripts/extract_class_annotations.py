@@ -17,9 +17,11 @@ Example:
 
 import sys
 from pathlib import Path
+
 import pandas as pd
 
-def main():
+
+def main() -> None:
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
         print(__doc__.strip())
         sys.exit(1)
