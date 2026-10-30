@@ -8,6 +8,9 @@ Source:
     DOI: 10.1038/s41586-023-06457-y
     File: 41586_2023_6457_MOESM4_ESM.xlsx (Sheet: "ST21 Sequence class annotation")
 
+Requirements:
+    - pandas
+
 Usage:
     python extract_class_annotations.py <table_21.xlsx> [output.bed]
 
@@ -22,6 +25,7 @@ import pandas as pd
 
 
 def main() -> None:
+    """Read the ST21 sheet, keep the chrY rows and write them as BED4 (default: the chm13 annotations folder)."""
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
         print(__doc__.strip())
         sys.exit(1)

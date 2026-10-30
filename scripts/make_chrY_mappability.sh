@@ -3,6 +3,11 @@
 # make_chrY_mappability.sh
 # Extracts chrY mappability from full hs1 mappability and produces mappability_chrY.bw.
 #
+# Strategy:
+#   - Input: mappability.bw from make_mappability.sh.
+#   - chrY is dumped to bedGraph and rebuilt as a BigWig with a chrY-only chrom.sizes
+#     (from hs1.chrom.sizes, or the CHM13v2.0 chrY length if that file is missing).
+#
 # Requirements:
 #   - bigWigToBedGraph, bedGraphToBigWig (UCSC userApps / bioconda)
 #

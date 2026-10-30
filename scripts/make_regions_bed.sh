@@ -7,6 +7,9 @@
 #   - PAR1 & PAR2: Extracted from sequence_classes.bed (Rhie et al. 2023)
 #   - AZFa, AZFb, AZFc: Official T2T Consortium curated coordinates from MARBL
 #
+# Requirements:
+#   - curl, awk, sort, column
+#
 # Usage:
 #   bash make_regions_bed.sh [output_regions.bed] [input_sequence_classes.bed]
 #

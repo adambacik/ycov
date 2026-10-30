@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 #
 # simulate_reads.sh
-# Simulates CRAM files with mosaic loss 50 % and AZFc region deletion
+# Simulates two CRAMs from one real sample: AZFc deletion and 50 % mosaic loss of Y (mLOY),
+# and runs mosdepth on the original and both copies.
 #
 # Strategy:
+#   - Sample name: the single SM tag of the input CRAM; copies are renamed to <SM>_azfc_del / <SM>_mloy50
 #   - AZFc deletion: reads overlapping AZFc (from regions.bed) removed with samtools view -L, using the complement BED
 #   - mLOY: chrY reads split off, subsampled to 50% (SEED), merged back with the rest
 #   - mosdepth (1 kb, all reads + MAPQ 20) on the original and both copies, plus truth.tsv
@@ -13,6 +15,8 @@
 #
 # Usage:
 #   bash simulate_reads.sh <sample.cram> <reference.fasta> [regions.bed] [output_folder]
+#
+#   Environment: THREADS (default 4), SEED (default 42, also seeds the mLOY subsampling)
 #
 # Example:
 #   bash simulate_reads.sh ~/ycov_data/HG00096.subset.cram ~/ycov_data/chm13v2.0.XY.fasta
@@ -101,7 +105,7 @@ awk -v OFS='\t' '$1 != "chrY" {print $1, 0, $2}' "${FASTA}.fai" > "${REST_BED}"
 samtools view -@ "${THREADS}" -C -T "${FASTA}" -L "${REST_BED}" -o "${REST_PART}" "${CRAM}"
 samtools view -@ "${THREADS}" -C -T "${FASTA}" -o "${CHRY_PART}" "${CRAM}" chrY
 
-# Downsample chrY reads
+# Downsample chrY reads: -s SEED.FRACTION keeps ~50 % of read pairs
 samtools view -@ "${THREADS}" -C -T "${FASTA}" -s "${SEED}".5 "${CHRY_PART}" -o "${CHRY_SUB}"
 
 # Merge crams into one, rename the sample + make index
@@ -110,6 +114,8 @@ rename_sample "${TMP_DIR}/mloy50.cram" "${MLOY_CRAM}" "${SAMPLE}_mloy50"
 
 
 echo "[3/5] Running mosdepth..."
+
+# 1 kb windows, all reads and MAPQ >= 20, for the original and both copies
 
 mkdir -p "${COV_DIR}/original"
 mosdepth --no-per-base --threads "${THREADS}" --fasta "${FASTA}" --by 1000 "${COV_DIR}/original/${SAMPLE}" "${CRAM}"
