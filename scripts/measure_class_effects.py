@@ -31,6 +31,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
 from simulate import READ_LEN, WINDOW_SIZE, label_windows, read_bed
 
 ANNOTATIONS_DIR = Path(__file__).resolve().parents[1] / "src/ycov/annotations/chm13"
@@ -103,7 +104,7 @@ def main() -> None:
         with np.errstate(divide="ignore", invalid="ignore"):
             measured = measure_sample(read_sample(args.mosdepth_dir, sample), classes)
 
-        if measured.set_index("class").loc["X-DEG", "factor"] < MIN_Y_FACTOR:
+        if measured.set_index("class")["factor"]["X-DEG"] < MIN_Y_FACTOR:
             print(f"Skipping {sample}: no Y", file=sys.stderr)
             continue
         print(f"Measured {sample}", file=sys.stderr)
@@ -117,13 +118,16 @@ def main() -> None:
     per_class = pd.concat(frames).groupby("class")
     print(per_class.agg(["median", "min", "max"]).round(3).to_string(), file=sys.stderr)
 
-    medians = per_class.median()
+    effects = {
+        str(cls): f"({row.factor:.2f}, {row.mapq_frac:.2f}, {row.cv:.2f})"
+        for cls, row in per_class.median().iterrows()
+    }
+    default = effects.pop("DEFAULT")
     print("CLASS_EFFECTS = {")
-    for cls, row in medians.drop("DEFAULT").iterrows():
-        print(f'    "{cls}": ({row.factor:.2f}, {row.mapq_frac:.2f}, {row.cv:.2f}),')
+    for cls, effect in effects.items():
+        print(f'    "{cls}": {effect},')
     print("}")
-    row = medians.loc["DEFAULT"]
-    print(f"DEFAULT_EFFECT = ({row.factor:.2f}, {row.mapq_frac:.2f}, {row.cv:.2f})")
+    print(f"DEFAULT_EFFECT = {default}")
 
 
 if __name__ == "__main__":

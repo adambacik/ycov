@@ -54,7 +54,7 @@ READ_LEN = 150
 
 # (depth factor, mapq >= 20 fraction, CV) for every seq class; CV = extra variation on top of the counting noise
 # Data based on scripts/measure_class_effects.py script
-CLASS_EFFECTS = {} # TODO
+CLASS_EFFECTS: dict[str, tuple[float, float, float]] = {} # TODO
 
 # chrX, autosomes and windows without a class (PAR1/PAR2 are gaps and end up 0 anyway)
 DEFAULT_EFFECT = () # TODO
@@ -278,7 +278,7 @@ def label_windows(windows: pd.DataFrame, classes: pd.DataFrame, gaps: pd.DataFra
     windows["seq_class"] = None
     for row in classes.itertuples():
         in_class = (windows["chrom"] == row.chrom) & (mid >= row.start) & (mid < row.end)
-        windows.loc[in_class, "seq_class"] = row.name
+        windows.loc[in_class, "seq_class"] = str(row.name)
 
     windows["is_gap"] = False
     for row in gaps.itertuples():
