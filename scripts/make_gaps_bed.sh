@@ -4,8 +4,12 @@
 # Scans a reference FASTA file for N-runs (assembly gaps or hard-masked regions)
 # and produces a 0-based BED4 file: <chrom> <start> <end> gap
 #
+# Strategy:
+#   - Embedded Python streams the FASTA line by line (plain or gzipped), so the genome is never held in memory.
+#   - A gap is any run of N/n, also when it spans several FASTA lines.
+#
 # Requirements:
-#   - python3 (with standard library)
+#   - python3 (with standard library), column
 #
 # Usage:
 #   bash make_gaps_bed.sh <reference.fasta[.gz]> [output_gaps.bed]

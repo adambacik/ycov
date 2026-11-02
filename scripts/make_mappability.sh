@@ -48,7 +48,7 @@ mkdir -p "$(dirname "${OUT}")"
 TMP_DIR="$(mktemp -d -t mappability_XXXXXX)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
-# ── 1. Obtain chromosome sizes ───────────────────────────────────────────────
+
 if [[ ! -f "${CHROM_SIZES}" ]]; then
     echo "[1/4] Fetching hs1 chromosome sizes..."
     curl -fL -s -o "${CHROM_SIZES}" "${CHROM_SIZES_URL}"
@@ -62,8 +62,10 @@ for c in "${TARGET_CHROMS[@]}"; do
     awk -v chrom="$c" '$1 == chrom { print $1 "\t" $2 }' "${CHROM_SIZES}"
 done > "${TARGET_SIZES}"
 
-# ── 2. Extract target chromosomes from UCSC BigWig ──────────────────────────
+
 echo "[2/4] Streaming target chromosomes (${TARGET_CHROMS[*]}) from UCSC..."
+
+# One chromosome at a time, appended into a single bedGraph
 TMP_BG="${TMP_DIR}/target_mappability.bg"
 : > "${TMP_BG}"
 
@@ -74,10 +76,12 @@ for c in "${TARGET_CHROMS[@]}"; do
     rm -f "${TMP_DIR}/${c}.bg"
 done
 
-# ── 3. Sort and convert to BigWig ────────────────────────────────────────────
+
 echo "[3/4] Converting extracted regions into indexed BigWig: ${OUT}..."
+
+# bedGraphToBigWig needs the input sorted by chrom and start
 LC_ALL=C sort -k1,1 -k2,2n "${TMP_BG}" > "${TMP_DIR}/sorted.bg"
 bedGraphToBigWig "${TMP_DIR}/sorted.bg" "${TARGET_SIZES}" "${OUT}"
 
-# ── 4. Summary and verification ──────────────────────────────────────────────
-echo "[4/4] Done! Mappability BigWig generated at: ${OUT} ($(du -h "${OUT}" | cut -f1))"
+
+echo "[4/4] Done! Mappability BigWig written to: ${OUT} ($(du -h "${OUT}" | cut -f1))"

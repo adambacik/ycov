@@ -12,7 +12,7 @@ Requirements:
 
 Usage:
     python quicklook.py <reference.fasta> <sample.cram> [--window-size 10000] [--mapq 0]
-                        [--outdir DIR] [--start-mb X --end-mb Y]
+                        [--outdir DIR]
 
 Example:
     python quicklook.py chm13v2.0.XY.fasta HG00096.subset.cram --mapq 20 --outdir ~/ycov_data/quicklook
@@ -57,6 +57,7 @@ def read_bed(path: Path) -> pd.DataFrame:
 def run_mosdepth(
     fasta: Path, cram: Path, prefix: Path, window_size: int, mapq: int
 ) -> bool:
+    """Run mosdepth on chrY into <prefix>.regions.bed.gz, or reuse it if it exists; False if mosdepth fails."""
     if Path(f"{prefix}.regions.bed.gz").exists():
         print(f"Reusing existing {prefix}.regions.bed.gz")
         return True
@@ -90,6 +91,7 @@ def run_mosdepth(
 def draw_plot(
     coverage: pd.DataFrame, classes: pd.DataFrame, gaps: pd.DataFrame, title: str
 ) -> go.Figure:
+    """Depth bars on top, a sequence-class bar below, gaps shaded and the y axis capped at 3x the median."""
     fig = make_subplots(
         rows=2,
         cols=1,
@@ -98,7 +100,7 @@ def draw_plot(
         vertical_spacing=0.02,
     )
 
-    # top: depth per window
+    # Top: depth per window
     fig.add_trace(
         go.Bar(
             x=coverage["start_mb"],
@@ -113,7 +115,7 @@ def draw_plot(
         col=1,
     )
 
-    # bottom: one horizontal bar per sequence class
+    # Bottom: one horizontal bar per sequence class
     for class_name, group in classes.groupby("value", sort=False):
         fig.add_trace(
             go.Bar(
@@ -141,7 +143,7 @@ def draw_plot(
             col=1,
         )
 
-    # cap y at 3x median so satellite/AMPL spikes do not flatten the rest
+    # Median of covered windows as a reference line; y is capped at 3x it so SAT/AMPL spikes do not flatten the rest
     median = coverage.loc[coverage["value"] > 0, "value"].median()
     fig.add_hline(
         y=median,
@@ -159,6 +161,7 @@ def draw_plot(
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse FASTA, CRAM, --outdir, --window-size and --mapq; the module docstring is the --help text."""
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -176,8 +179,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Run (or reuse) mosdepth, draw the plot, save it as HTML and open it."""
     args = parse_args()
 
+    # Sample name = CRAM file name up to the first dot
     sample = args.cram.name.split(".")[0]
     prefix = args.outdir / f"{sample}.chrY.w{args.window_size}.q{args.mapq}"
     if not run_mosdepth(args.fasta, args.cram, prefix, args.window_size, args.mapq):

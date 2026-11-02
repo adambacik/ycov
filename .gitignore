@@ -67,3 +67,9 @@ scratch/
 
 # claude code local settings
 .claude/settings.local.json
+
+# exception for test/example data (overrides the global ignores above)
+!tests/data/**/*.bam
+!tests/data/**/*.bai
+!tests/data/**/*.csi
+!example_data/**/*.csi
