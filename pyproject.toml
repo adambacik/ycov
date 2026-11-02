@@ -31,6 +31,10 @@ scripts = [
     "plotly>=7.1.0",
 ]
 
+[tool.ruff.lint.isort]
+# scripts/ import each other (e.g. from simulate import ...), keep them in their own import group
+known-first-party = ["ycov", "simulate"]
+
 [tool.mypy]
 disallow_untyped_defs = true
 warn_unused_ignores = true

@@ -31,7 +31,6 @@ Example:
         --outdir ~/ycov_data/sim --seed 42
 """
 
-
 import argparse
 import shutil
 import subprocess
@@ -54,10 +53,10 @@ READ_LEN = 150
 
 # (depth factor, mapq >= 20 fraction, CV) for every seq class; CV = extra variation on top of the counting noise
 # Data based on scripts/measure_class_effects.py script
-CLASS_EFFECTS: dict[str, tuple[float, float, float]] = {} # TODO
+CLASS_EFFECTS: dict[str, tuple[float, float, float]] = {}  # TODO
 
 # chrX, autosomes and windows without a class (PAR1/PAR2 are gaps and end up 0 anyway)
-DEFAULT_EFFECT = () # TODO
+DEFAULT_EFFECT = ()  # TODO
 
 TruthRow = dict[str, str | float | int | None]
 
@@ -65,6 +64,7 @@ TruthRow = dict[str, str | float | int | None]
 @dataclass
 class Scenario:
     """One simulated sample: its identity and truth, its metadata.tsv row and the parameters for set_depths."""
+
     # identity and truth
     sample_id: str
     name: str
@@ -78,30 +78,110 @@ class Scenario:
     x_copies: float = 1.0
     y_copies: float = 1.0
     deleted: list[str] = field(default_factory=list)
-    partial: list[tuple[str, int, int, float]] = field(default_factory=list)   # (label, start, end, rel_copy) on chrY
-    reported_sex: str | None = None   # sex written to metadata.tsv; None = same as sex
+    # (label, start, end, rel_copy) on chrY
+    partial: list[tuple[str, int, int, float]] = field(default_factory=list)
+    reported_sex: str | None = None  # sex written to metadata.tsv; None = same as sex
 
 
 SCENARIOS = [
-    Scenario(sample_id="S01", name="normal_male", sex="M", age=34, population="SIM_A", phenotype="fertile"),
-    Scenario(sample_id="S02", name="azfc_del", sex="M", age=38, population="SIM_A", phenotype="azoospermia",
-             deleted=["AZFc"]),
-    Scenario(sample_id="S03", name="mloy_50", sex="M", age=78, population="SIM_B", phenotype="fertile",
-             y_copies=0.5),
-    Scenario(sample_id="S04", name="female", sex="F", age=29, population="SIM_B", phenotype="fertile",
-             x_copies=2.0, y_copies=0.0),
-    Scenario(sample_id="S05", name="xyy", sex="M", age=25, population="SIM_A", phenotype="fertile",
-             y_copies=2.0),
-    Scenario(sample_id="S06", name="shallow_5x", sex="M", age=45, population="SIM_B", phenotype="fertile",
-             depth=5.0),
-    Scenario(sample_id="S07", name="azfa_del", sex="M", age=33, population="SIM_A", phenotype="azoospermia",
-             deleted=["AZFa"]),
-    Scenario(sample_id="S08", name="azfb_del", sex="M", age=36, population="SIM_B", phenotype="azoospermia",
-             deleted=["AZFb"]),
-    Scenario(sample_id="S09", name="normal_male_2", sex="M", age=52, population="SIM_B", phenotype="fertile"),
-    Scenario(sample_id="S10", name="normal_male_3", sex="M", age=61, population="SIM_A", phenotype="fertile"),
-    Scenario(sample_id="S11", name="partial_azfc", sex="M", age=40, population="SIM_B", phenotype="oligozoospermia",
-             partial=[("azfc_partial", 26_490_936, 27_020_249, 0.5)]),  # generic: the part of AZFc outside AZFb, not gr/gr
+    Scenario(
+        sample_id="S01",
+        name="normal_male",
+        sex="M",
+        age=34,
+        population="SIM_A",
+        phenotype="fertile",
+    ),
+    Scenario(
+        sample_id="S02",
+        name="azfc_del",
+        sex="M",
+        age=38,
+        population="SIM_A",
+        phenotype="azoospermia",
+        deleted=["AZFc"],
+    ),
+    Scenario(
+        sample_id="S03",
+        name="mloy_50",
+        sex="M",
+        age=78,
+        population="SIM_B",
+        phenotype="fertile",
+        y_copies=0.5,
+    ),
+    Scenario(
+        sample_id="S04",
+        name="female",
+        sex="F",
+        age=29,
+        population="SIM_B",
+        phenotype="fertile",
+        x_copies=2.0,
+        y_copies=0.0,
+    ),
+    Scenario(
+        sample_id="S05",
+        name="xyy",
+        sex="M",
+        age=25,
+        population="SIM_A",
+        phenotype="fertile",
+        y_copies=2.0,
+    ),
+    Scenario(
+        sample_id="S06",
+        name="shallow_5x",
+        sex="M",
+        age=45,
+        population="SIM_B",
+        phenotype="fertile",
+        depth=5.0,
+    ),
+    Scenario(
+        sample_id="S07",
+        name="azfa_del",
+        sex="M",
+        age=33,
+        population="SIM_A",
+        phenotype="azoospermia",
+        deleted=["AZFa"],
+    ),
+    Scenario(
+        sample_id="S08",
+        name="azfb_del",
+        sex="M",
+        age=36,
+        population="SIM_B",
+        phenotype="azoospermia",
+        deleted=["AZFb"],
+    ),
+    Scenario(
+        sample_id="S09",
+        name="normal_male_2",
+        sex="M",
+        age=52,
+        population="SIM_B",
+        phenotype="fertile",
+    ),
+    Scenario(
+        sample_id="S10",
+        name="normal_male_3",
+        sex="M",
+        age=61,
+        population="SIM_A",
+        phenotype="fertile",
+    ),
+    Scenario(
+        sample_id="S11",
+        name="partial_azfc",
+        sex="M",
+        age=40,
+        population="SIM_B",
+        phenotype="oligozoospermia",
+        # generic: the part of AZFc outside AZFb, not gr/gr
+        partial=[("azfc_partial", 26_490_936, 27_020_249, 0.5)],
+    ),
 ]
 
 
@@ -109,9 +189,13 @@ def get_chromosome_lengths(fasta: Path) -> dict[str, int]:
     """Read the lengths of the CHROMS from the FASTA's .fai index, fail if it or any of them is missing."""
     fai = fasta.with_name(fasta.name + ".fai")
     if not fai.exists():
-        raise FileNotFoundError(f"FASTA index file {fai} does not exist. Please create it using samtools faidx.")
+        raise FileNotFoundError(
+            f"FASTA index file {fai} does not exist. Please create it using samtools faidx."
+        )
 
-    df = pd.read_csv(fai, sep="\t", header=None, usecols=[0, 1], names=["chrom", "length"])
+    df = pd.read_csv(
+        fai, sep="\t", header=None, usecols=[0, 1], names=["chrom", "length"]
+    )
     lengths = dict(zip(df["chrom"], df["length"]))
 
     missing = [c for c in CHROMS if c not in lengths]
@@ -136,18 +220,26 @@ def validate_scenarios(scenarios: list[Scenario], regions: pd.DataFrame) -> None
 
     for s in scenarios:
         if (s.deleted or s.partial) and s.y_copies == 0:
-            errors.append(f"{s.sample_id}: cannot delete regions without Y (y_copies = 0)")
+            errors.append(
+                f"{s.sample_id}: cannot delete regions without Y (y_copies = 0)"
+            )
 
         for region in s.deleted:
             n = ((regions["chrom"] == "chrY") & (regions["name"] == region)).sum()
             if n != 1:
-                errors.append(f"{s.sample_id}: expected one chrY region named {region} in regions.bed, found {n}")
+                errors.append(
+                    f"{s.sample_id}: expected one chrY region named {region} in regions.bed, found {n}"
+                )
 
         for label, start, end, rel_copy in s.partial:
             if start >= end:
-                errors.append(f"{s.sample_id}: partial deletion {label} has start >= end")
+                errors.append(
+                    f"{s.sample_id}: partial deletion {label} has start >= end"
+                )
             if not 0 <= rel_copy < 1:
-                errors.append(f"{s.sample_id}: partial deletion {label} needs 0 <= rel_copy < 1, got {rel_copy}")
+                errors.append(
+                    f"{s.sample_id}: partial deletion {label} needs 0 <= rel_copy < 1, got {rel_copy}"
+                )
 
     if errors:
         raise ValueError("Invalid scenarios:\n  " + "\n  ".join(errors))
@@ -173,21 +265,47 @@ def truth_rows(scenario: Scenario, regions: pd.DataFrame) -> list[TruthRow]:
     y_regions = regions[regions["chrom"] == "chrY"]
 
     def overlaps(name: str, start: int, end: int) -> str | None:
-        hits = y_regions[(y_regions["name"] != name) & (y_regions["start"] < end) & (y_regions["end"] > start)]
+        hits = y_regions[
+            (y_regions["name"] != name)
+            & (y_regions["start"] < end)
+            & (y_regions["end"] > start)
+        ]
         return ",".join(hits["name"]) or None
 
     rows: list[TruthRow] = []
     for region in scenario.deleted:
-        match = y_regions[y_regions["name"] == region]  # One match, see validate_scenarios
+        # One match, see validate_scenarios
+        match = y_regions[y_regions["name"] == region]
         start, end = int(match["start"].iloc[0]), int(match["end"].iloc[0])
-        rows.append({**base, "event": "deletion", "region": region, "chrom": "chrY", "start": start, "end": end,
-                     "expected_rel_copy": 0.0, "overlaps": overlaps(region, start, end)})
+        rows.append(
+            {
+                **base,
+                "event": "deletion",
+                "region": region,
+                "chrom": "chrY",
+                "start": start,
+                "end": end,
+                "expected_rel_copy": 0.0,
+                "overlaps": overlaps(region, start, end),
+            }
+        )
 
     for label, start, end, rel_copy in scenario.partial:
-        rows.append({**base, "event": "partial_deletion", "region": label, "chrom": "chrY", "start": start, "end": end,
-                     "expected_rel_copy": rel_copy, "overlaps": overlaps(label, start, end)})
+        rows.append(
+            {
+                **base,
+                "event": "partial_deletion",
+                "region": label,
+                "chrom": "chrY",
+                "start": start,
+                "end": end,
+                "expected_rel_copy": rel_copy,
+                "overlaps": overlaps(label, start, end),
+            }
+        )
 
-    normal_y = 1.0 if scenario.sex == "M" else 0.0  # Females have no Y, so y_copies = 0 is no event
+    # Females have no Y, so y_copies = 0 is no event
+    normal_y = 1.0 if scenario.sex == "M" else 0.0
     if scenario.y_copies == normal_y:
         event = "none"
     elif scenario.y_copies == 0.0:
@@ -196,13 +314,25 @@ def truth_rows(scenario: Scenario, regions: pd.DataFrame) -> list[TruthRow]:
         event = "mloy"
     else:
         event = "y_gain"
-    rows.append({**base, "event": event, "region": "chrY", "chrom": "chrY", "start": None, "end": None,
-                 "expected_rel_copy": scenario.y_copies, "overlaps": None})
+    rows.append(
+        {
+            **base,
+            "event": event,
+            "region": "chrY",
+            "chrom": "chrY",
+            "start": None,
+            "end": None,
+            "expected_rel_copy": scenario.y_copies,
+            "overlaps": None,
+        }
+    )
 
     return rows
-    
 
-def write_truth_table(scenarios: list[Scenario], outdir: Path, regions: pd.DataFrame) -> Path:
+
+def write_truth_table(
+    scenarios: list[Scenario], outdir: Path, regions: pd.DataFrame
+) -> Path:
     """Collect the truth rows of all scenarios, sort them by sample and start and write truth.tsv ("." = no value)."""
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -245,7 +375,9 @@ def write_files(sample: pd.DataFrame, sample_id: str, outdir: Path) -> list[Path
     written = []
     for column, suffix in [("depth", ""), ("depth_q20", ".q20")]:
         bed_file = outdir / f"{sample_id}{suffix}.regions.bed"
-        sample[["chrom", "start", "end", column]].to_csv(bed_file, sep="\t", header=False, index=False, float_format="%.2f")
+        sample[["chrom", "start", "end", column]].to_csv(
+            bed_file, sep="\t", header=False, index=False, float_format="%.2f"
+        )
         subprocess.run(["bgzip", "-f", str(bed_file)], check=True)
         subprocess.run(["tabix", "-f", "-C", "-p", "bed", f"{bed_file}.gz"], check=True)
         written.append(Path(f"{bed_file}.gz"))
@@ -265,7 +397,12 @@ def build_windows(lengths: dict[str, int]) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
-def label_windows(windows: pd.DataFrame, classes: pd.DataFrame, gaps: pd.DataFrame, regions: pd.DataFrame) -> pd.DataFrame:
+def label_windows(
+    windows: pd.DataFrame,
+    classes: pd.DataFrame,
+    gaps: pd.DataFrame,
+    regions: pd.DataFrame,
+) -> pd.DataFrame:
     """Annotate the windows with what set_depths needs.
 
     seq_class = the class containing the window midpoint, is_gap = overlaps any gap,
@@ -277,29 +414,45 @@ def label_windows(windows: pd.DataFrame, classes: pd.DataFrame, gaps: pd.DataFra
     # Midpoint picks one class per window; where classes overlap (2 bp XTR2/X-DEG) the later row wins
     windows["seq_class"] = None
     for row in classes.itertuples():
-        in_class = (windows["chrom"] == row.chrom) & (mid >= row.start) & (mid < row.end)
+        in_class = (
+            (windows["chrom"] == row.chrom) & (mid >= row.start) & (mid < row.end)
+        )
         windows.loc[in_class, "seq_class"] = str(row.name)
 
     windows["is_gap"] = False
     for row in gaps.itertuples():
-        windows["is_gap"] |= (windows["chrom"] == row.chrom) & (windows["start"] < row.end) & (windows["end"] > row.start)
+        windows["is_gap"] |= (
+            (windows["chrom"] == row.chrom)
+            & (windows["start"] < row.end)
+            & (windows["end"] > row.start)
+        )
 
     for row in regions.itertuples():
-        windows[f"in_{row.name}"] = (windows["chrom"] == row.chrom) & (windows["start"] < row.end) & (windows["end"] > row.start)
+        windows[f"in_{row.name}"] = (
+            (windows["chrom"] == row.chrom)
+            & (windows["start"] < row.end)
+            & (windows["end"] > row.start)
+        )
 
     windows["is_x_par"] = False
     for start, end in X_PARS:
-        windows["is_x_par"] |= (windows["chrom"] == "chrX") & (mid >= start) & (mid < end)
+        windows["is_x_par"] |= (
+            (windows["chrom"] == "chrX") & (mid >= start) & (mid < end)
+        )
 
     return windows
 
 
 def read_bed(file: Path) -> pd.DataFrame:
     """Read a headerless BED4 file into chrom, start, end, name columns."""
-    return pd.read_csv(file, sep="\t", header=None, names=["chrom", "start", "end", "name"])
+    return pd.read_csv(
+        file, sep="\t", header=None, names=["chrom", "start", "end", "name"]
+    )
 
 
-def set_depths(windows: pd.DataFrame, scenario: Scenario, rng: np.random.Generator) -> pd.DataFrame:
+def set_depths(
+    windows: pd.DataFrame, scenario: Scenario, rng: np.random.Generator
+) -> pd.DataFrame:
     """Simulate the depth of every window for one scenario.
 
     Expected depth = copies * depth / 2 (2 copies on autosomes, x_copies / y_copies on chrX / chrY,
@@ -318,7 +471,8 @@ def set_depths(windows: pd.DataFrame, scenario: Scenario, rng: np.random.Generat
 
     windows["expected"] = windows["copies"] * scenario.depth / 2.0
 
-    effects = windows["seq_class"].map(lambda c: CLASS_EFFECTS.get(c, DEFAULT_EFFECT)) # Column of tuples
+    # Column of tuples
+    effects = windows["seq_class"].map(lambda c: CLASS_EFFECTS.get(c, DEFAULT_EFFECT))
     factor = np.array([effect[0] for effect in effects])
     mapq_frac = np.array([effect[1] for effect in effects])
     cv = np.array([effect[2] for effect in effects])
@@ -329,7 +483,11 @@ def set_depths(windows: pd.DataFrame, scenario: Scenario, rng: np.random.Generat
         windows.loc[windows[f"in_{deleted}"], "expected"] = 0.0
 
     for _, start, end, rel_copy in scenario.partial:
-        mask = (windows["chrom"] == "chrY") & (start < windows["end"]) & (end > windows["start"])
+        mask = (
+            (windows["chrom"] == "chrY")
+            & (start < windows["end"])
+            & (end > windows["start"])
+        )
         windows.loc[mask, "expected"] *= rel_copy
 
     windows.loc[windows["is_gap"], "expected"] = 0.0
@@ -369,7 +527,7 @@ def main() -> None:
         "reference.fasta": args.fasta.exists(),
         "sequence_classes.bed": args.classes.exists(),
         "gaps.bed": args.gaps.exists(),
-        "regions.bed": args.regions.exists()
+        "regions.bed": args.regions.exists(),
     }
     missing = [name for name, exists in files_got.items() if not exists]
     if missing:
@@ -382,7 +540,11 @@ def main() -> None:
     files_written = []
 
     # Read annotations and check the scenarios against them before any work
-    classes_data, gaps_data, regions_data = read_bed(args.classes), read_bed(args.gaps), read_bed(args.regions)
+    classes_data, gaps_data, regions_data = (
+        read_bed(args.classes),
+        read_bed(args.gaps),
+        read_bed(args.regions),
+    )
     validate_scenarios(SCENARIOS, regions_data)
 
     # Get chromosome lengths
@@ -395,7 +557,9 @@ def main() -> None:
     # Save files
     for scenario in SCENARIOS:
         # Own generator per sample (seed + sample_id), so adding or reordering scenarios does not change the others
-        rng = np.random.default_rng([args.seed, zlib.crc32(scenario.sample_id.encode())])
+        rng = np.random.default_rng(
+            [args.seed, zlib.crc32(scenario.sample_id.encode())]
+        )
         sample = set_depths(windows, scenario, rng)
         files_written.extend(write_files(sample, scenario.sample_id, args.outdir))
 
@@ -407,8 +571,10 @@ def main() -> None:
     files_written.append(write_metadata_table(SCENARIOS, args.outdir))
 
     # Confirm
-    print(f"Simulation completed. {len(SCENARIOS)} samples created. {len(files_written)} files written to {args.outdir}.")
+    print(
+        f"Simulation completed. {len(SCENARIOS)} samples created. {len(files_written)} files written to {args.outdir}."
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
