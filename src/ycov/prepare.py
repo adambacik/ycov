@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from ycov.coverage.readers import read_coverage
 from ycov.models import Sample
 from ycov.validate.inputs import validate_files, validate_output_dir
 
@@ -13,6 +14,7 @@ def prepare_project(files: list[Path], outdir: Path) -> None:
     validate_output_dir(outdir)
 
     # coverage
+    coverages = read_coverage(samples)
 
     # windows with annotations
 

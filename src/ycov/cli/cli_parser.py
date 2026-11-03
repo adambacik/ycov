@@ -49,9 +49,8 @@ def view(
     project: Annotated[
         Path,
         typer.Argument(
-            help="Project folder made by ycov prepare",
-            exists=False,
-            file_okay=False),
+            help="Project folder made by ycov prepare", exists=False, file_okay=False
+        ),
     ],
 ) -> None:
     """Open a ycov project folder in the browser."""
