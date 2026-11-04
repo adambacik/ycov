@@ -21,7 +21,10 @@ class Columns(StrEnum):
     START = "start"
     END = "end"
     DEPTH = "depth"
-    # ... in phase 3
+    SEQ_CLASS = "seq_class"
+    IS_GAP = "is_gap"
+    IS_PAR = "is_par"
+    RELIABLE = "reliable"
 
 
 @dataclass(frozen=True)
