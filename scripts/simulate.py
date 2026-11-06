@@ -51,12 +51,24 @@ X_PARS = [(0, 2_394_410), (153_925_834, 154_259_566)]
 # Read length for the counting noise (1KGP high-coverage: 2 x 150 bp)
 READ_LEN = 150
 
-# (depth factor, mapq >= 20 fraction, CV) for every seq class; CV = extra variation on top of the counting noise
+# (depth factor, mapq >= 20 fraction, CV) for every seq class, CV = extra variation on top of the counting noise
 # Data based on scripts/measure_class_effects.py script
-CLASS_EFFECTS: dict[str, tuple[float, float, float]] = {}  # TODO
+CLASS_EFFECTS: dict[str, tuple[float, float, float]] = {
+    "AMPL": (0.94, 0.31, 0.21),
+    "CEN": (1.04, 0.02, 0.44),
+    "DYZ17": (1.09, 0.48, 0.42),
+    "DYZ19": (1.38, 0.91, 0.59),
+    "HET": (0.76, 0.06, 0.68),
+    "OTHER": (0.96, 0.97, 0.19),
+    "SAT": (0.98, 0.96, 0.17),
+    "X-DEG": (0.96, 0.99, 0.11),
+    "XTR1": (0.95, 0.94, 0.12),
+    "XTR2": (0.96, 0.96, 0.17),
+}
 
-# chrX, autosomes and windows without a class (PAR1/PAR2 are gaps and end up 0 anyway)
-DEFAULT_EFFECT = ()  # TODO
+# cv measured on windows within 0.5-1.5x median, outliers inflate it to 0.36
+DEFAULT_EFFECT = (1.01, 0.87, 0.13)
+
 
 TruthRow = dict[str, str | float | int | None]
 

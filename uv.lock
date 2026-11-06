@@ -982,6 +982,7 @@ dependencies = [
     { name = "polars" },
     { name = "typer" },
 ]
+default-groups = ["dev", "scripts"]
 
 [package.dev-dependencies]
 dev = [
