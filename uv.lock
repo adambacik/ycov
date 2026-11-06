@@ -883,6 +883,7 @@ wheels = [
 name = "ycov"
 version = "0.1.0"
 source = { editable = "." }
+default-groups = ["dev", "scripts"]
 
 [package.dev-dependencies]
 dev = [

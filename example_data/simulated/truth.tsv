@@ -1,0 +1,16 @@
+sample_id	scenario	sex	depth	x_copies	y_copies	event	region	chrom	start	end	expected_rel_copy	overlaps
+S01	normal_male	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S02	azfc_del	M	30.0	1.0	1.0	deletion	AZFc	chrY	23327301	27020249	0.0	AZFb
+S02	azfc_del	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S03	mloy_50	M	30.0	1.0	0.5	mloy	chrY	chrY	.	.	0.5	.
+S04	female	F	30.0	2.0	0.0	none	chrY	chrY	.	.	0.0	.
+S05	xyy	M	30.0	1.0	2.0	y_gain	chrY	chrY	.	.	2.0	.
+S06	shallow_5x	M	5.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S07	azfa_del	M	30.0	1.0	1.0	deletion	AZFa	chrY	13228406	14019819	0.0	.
+S07	azfa_del	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S08	azfb_del	M	30.0	1.0	1.0	deletion	AZFb	chrY	18730346	26490936	0.0	AZFc
+S08	azfb_del	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S09	normal_male_2	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S10	normal_male_3	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S11	partial_azfc	M	30.0	1.0	1.0	partial_deletion	azfc_partial	chrY	26490936	27020249	0.5	AZFc
+S11	partial_azfc	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.

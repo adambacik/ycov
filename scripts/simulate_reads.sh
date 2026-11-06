@@ -145,10 +145,11 @@ MLOY_FRAC="$(awk -v a="${MLOY_Y}" -v b="${ORIG_Y}" 'BEGIN {printf "%.3f", a / b}
 
 # Same columns as truth.tsv from simulate.py; "." = no value
 {
-    printf 'sample_id\tscenario\tsex\tdepth\tx_copies\ty_copies\tevent\tregion\tchrom\tstart\tend\texpected_rel_copy\n'
-    printf '%s\tnormal_male\tM\t.\t1.0\t1.0\tnone\t.\t.\t.\t.\t1.0\n' "${SAMPLE}"
-    printf '%s_azfc_del\tazfc_del\tM\t.\t1.0\t1.0\tdeletion\tAZFc\tchrY\t%s\t%s\t0.0\n' "${SAMPLE}" "${AZFC_START}" "${AZFC_END}"
-    printf '%s_mloy50\tmloy_50\tM\t.\t1.0\t%s\tmloy\t.\tchrY\t.\t.\t%s\n' "${SAMPLE}" "${MLOY_FRAC}" "${MLOY_FRAC}"
+    printf 'sample_id\tscenario\tsex\tdepth\tx_copies\ty_copies\tevent\tregion\tchrom\tstart\tend\texpected_rel_copy\toverlaps\n'
+    printf '%s\tnormal_male\tM\t.\t1.0\t1.0\tnone\tchrY\tchrY\t.\t.\t1.0\t.\n' "${SAMPLE}"
+    printf '%s_azfc_del\tazfc_del\tM\t.\t1.0\t1.0\tdeletion\tAZFc\tchrY\t%s\t%s\t0.0\tAZFb\n' "${SAMPLE}" "${AZFC_START}" "${AZFC_END}"
+    printf '%s_azfc_del\tazfc_del\tM\t.\t1.0\t1.0\tnone\tchrY\tchrY\t.\t.\t1.0\t.\n' "${SAMPLE}"
+    printf '%s_mloy50\tmloy_50\tM\t.\t1.0\t%s\tmloy\tchrY\tchrY\t.\t.\t%s\t.\n' "${SAMPLE}" "${MLOY_FRAC}" "${MLOY_FRAC}"
 } > "${TRUTH}"
 
 echo "chrY reads kept in mLOY: ${MLOY_Y} / ${ORIG_Y} (${MLOY_FRAC})"

@@ -1,0 +1,3 @@
+sample_id	scenario	sex	depth	x_copies	y_copies	event	region	chrom	start	end	expected_rel_copy	overlaps
+HG00096_azfc_del	azfc_del	M	.	1.0	1.0	deletion	AZFc	chrY	23327301	27020249	0.0	AZFb
+HG00096_azfc_del	azfc_del	M	.	1.0	1.0	none	chrY	chrY	.	.	1.0	.
