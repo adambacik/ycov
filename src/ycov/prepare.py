@@ -15,10 +15,10 @@ def prepare_project(files: list[Path], outdir: Path) -> None:
     validate_output_dir(outdir)
 
     # coverage
-    coverages = read_coverage(samples)
+    read_coverage(samples)
 
     # windows with annotations
-    windows = build_windows(WINDOW_SIZE)
+    build_windows(WINDOW_SIZE)
 
     # normalise
 
