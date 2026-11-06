@@ -56,19 +56,22 @@ READS_DIR="${WORK_DIR}/sim_reads"
 TESTS_DIR="${REPO_DIR}/tests/data"
 EXAMPLE_DIR="${REPO_DIR}/example_data"
 
-# Kept slices (0-based BED, in .fai order: chr21, chrX, chrY).
-#   chrY: all of AZFc, end of AZFb, the partial AZFc interval, X-DEG, DYZ19, AMPL, OTHER, start of HET
-#   chrX: outside the PARs, for X ratio and sex check
-#   chr21: autosomal baseline
+# Kept slices (0-based BED, in .fai order: chr19-22, chrX, chrY).
+#   chrY: whole chromosome (ycov needs it: chrY end check, whole-chrY heatmap)
+#   chrX: outside the PARs, for X ratio and sex check (Phase 3)
+#   chr19-22: 1 Mb each away from the centromeres, autosomal baseline
 REGIONS=(
-    "chr21 20000000 25000000"
+    "chr19 35000000 36000000"
+    "chr20 40000000 41000000"
+    "chr21 30000000 31000000"
+    "chr22 30000000 31000000"
     "chrX 10000000 15000000"
-    "chrY 20000000 28000000"
+    "chrY 0 62460029"
 )
 
-# Samples per destination (their events must lie inside REGIONS; S07 = AZFa does not)
+# Samples per destination
 TESTS_SAMPLES="S01,S02,S03,S04"
-EXAMPLE_SAMPLES="S01,S02,S03,S04,S05,S06,S08,S09,S10,S11"
+EXAMPLE_SAMPLES="S01,S02,S03,S04,S05,S06,S07,S08,S09,S10,S11"
 
 # Deliberate metadata errors, tests/data/ only (sex check, FR30)
 TEST_MISLABELLED="S04"   # female written as reported_sex M

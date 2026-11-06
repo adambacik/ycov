@@ -1,0 +1,12 @@
+sample_id	reported_sex	population	age	phenotype
+S01	M	SIM_A	34	fertile
+S02	M	SIM_A	38	azoospermia
+S03	M	SIM_B	78	fertile
+S04	F	SIM_B	29	fertile
+S05	M	SIM_A	25	fertile
+S06	M	SIM_B	45	fertile
+S07	M	SIM_A	33	azoospermia
+S08	M	SIM_B	36	azoospermia
+S09	M	SIM_B	52	fertile
+S10	M	SIM_A	61	fertile
+S11	M	SIM_B	40	oligozoospermia

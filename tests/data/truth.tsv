@@ -1,0 +1,6 @@
+sample_id	scenario	sex	depth	x_copies	y_copies	event	region	chrom	start	end	expected_rel_copy	overlaps
+S01	normal_male	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S02	azfc_del	M	30.0	1.0	1.0	deletion	AZFc	chrY	23327301	27020249	0.0	AZFb
+S02	azfc_del	M	30.0	1.0	1.0	none	chrY	chrY	.	.	1.0	.
+S03	mloy_50	M	30.0	1.0	0.5	mloy	chrY	chrY	.	.	0.5	.
+S04	female	F	30.0	2.0	0.0	none	chrY	chrY	.	.	0.0	.
