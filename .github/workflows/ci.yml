@@ -42,7 +42,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run mypy src
+        run: uv run mypy src tests
 
       # add --cov-fail-under=70 once there is real code (NFR18)
       - name: Test
