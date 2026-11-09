@@ -5,6 +5,7 @@ from pathlib import Path
 from ycov.analysis.normalise import normalise
 from ycov.coverage.readers import read_coverage
 from ycov.models import WINDOW_SIZE, Sample
+from ycov.project.handle_project import write_project
 from ycov.validate.inputs import validate_files, validate_output_dir
 from ycov.windows.build import build_windows
 
@@ -24,4 +25,5 @@ def prepare_project(files: list[Path], outdir: Path) -> None:
     # normalise
     samples, coverage = normalise(coverage, windows, samples)
 
-    # save to outdir folder
+    # write outdir folder
+    write_project(outdir, windows, samples, coverage, WINDOW_SIZE)
