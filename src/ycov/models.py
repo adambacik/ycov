@@ -25,6 +25,7 @@ class Columns(StrEnum):
     IS_GAP = "is_gap"
     IS_PAR = "is_par"
     RELIABLE = "reliable"
+    REL_COPY = "rel_copy"
 
 
 @dataclass(frozen=True)
@@ -32,7 +33,8 @@ class Sample:
     id: str
     path: Path
     format: InputFormat
-    # baseline, sex, population, Y ratio ... in phase 3
+    baseline: float | None = None
+    # sex, population, Y ratio ... in phase 3
 
 
 # class Settings in phase 3
