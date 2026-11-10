@@ -1,6 +1,7 @@
 """Read coverage files of every input format into one long polars table (sample_id, chrom, start, end, depth)."""
 
 import gzip
+import logging
 from pathlib import Path
 
 import polars as pl
@@ -8,6 +9,8 @@ import polars as pl
 from ycov.coverage.check import check_contents
 from ycov.errors import YcovInputError
 from ycov.models import BASELINE_CHROMS, WINDOW_SIZE, Columns, InputFormat, Sample
+
+logger = logging.getLogger(__name__)
 
 HEADER_PREFIXES = ("track", "browser", "#")  # for bedgraph files
 COLUMN_NAMES = [Columns.CHROM, Columns.START, Columns.END, Columns.DEPTH]
@@ -23,9 +26,10 @@ def read_coverage(samples: list[Sample]) -> pl.DataFrame:
     """Read and combine all samples into one table with a sample_id column."""
     polar_data: list[pl.DataFrame] = []
 
-    for sample in samples:
+    for number, sample in enumerate(samples, start=1):
         data = read_sample(sample)
         polar_data.append(data)
+        logger.info("      %s coverage ✓  (%d/%d)", sample.id, number, len(samples))
 
     return pl.concat(polar_data)
 
