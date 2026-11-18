@@ -80,7 +80,7 @@ def view(
     ],
     port: Annotated[
         int,
-        typer.Option("--port", "-p", help="Port to connect to"),
+        typer.Option("--port", "-p", help="Port to connect to", min=1, max=65535),
     ] = 8000,
     no_browser: Annotated[
         bool,

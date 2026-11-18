@@ -1,6 +1,7 @@
 """Tests of server/: the four API endpoints through TestClient on a project built
-from tests/data/sim, and the helpers (parse_region, parse_samples, merge_runs,
-coverage, window_annotations) on tiny hand-made tables without HTTP."""
+from tests/data/sim, the frontend mount and its "not built" fallback, and the
+helpers (parse_region, parse_samples, merge_runs, coverage, window_annotations)
+on tiny hand-made tables without HTTP."""
 
 from importlib.metadata import version
 from itertools import pairwise
@@ -14,28 +15,29 @@ from fastapi.testclient import TestClient
 
 from ycov.errors import YcovInputError
 from ycov.models import CHM13_CHRY_LENGTH, Columns
-from ycov.prepare import prepare_project
 from ycov.server.app import create_app, parse_region, parse_samples
 from ycov.server.queries import coverage, merge_runs, window_annotations
 from ycov.windows.assign import NAME
 
-SIM_DIR = Path(__file__).parent / "data" / "sim"
 SIM_SAMPLES = ["S01", "S02", "S03", "S04"]
 AZFC = "chrY:23327301-27020249"
 HEATMAP_BINS = -(-CHM13_CHRY_LENGTH // 10_000)  # ceil: 6247 bins of 10 kb
+API_PATHS = {"/api/project", "/api/samples", "/api/windows", "/api/coverage"}
 
 
 @pytest.fixture(scope="module")
-def client(tmp_path_factory: pytest.TempPathFactory) -> TestClient:
-    """A TestClient on the simulated project, built once for this file."""
-    files = sorted(
-        f
-        for f in SIM_DIR.glob("*.regions.bed.gz")
-        if not f.name.endswith(".q20.regions.bed.gz")
-    )
-    project = tmp_path_factory.mktemp("server") / "project"
-    prepare_project(files, project)
-    return TestClient(create_app(project))
+def client(sim_project: Path) -> TestClient:
+    """A TestClient on the simulated project without a frontend, one app for this file."""
+    return TestClient(create_app(sim_project))
+
+
+@pytest.fixture
+def frontend(tmp_path: Path) -> Path:
+    """A fake Vite build: index.html and one hashed asset, like web/dist."""
+    (tmp_path / "assets").mkdir()
+    (tmp_path / "index.html").write_text("<!doctype html><div id='root'>ycov app</div>")
+    (tmp_path / "assets" / "index-abc123.js").write_text("console.log('ycov')")
+    return tmp_path
 
 
 def get_ok(client: TestClient, url: str) -> Any:
@@ -57,6 +59,68 @@ def test_create_app_rejects_folder_without_manifest(tmp_path: Path) -> None:
     # The error must come before any server starts, so ycov view can print it
     with pytest.raises(YcovInputError, match="manifest.json missing"):
         create_app(tmp_path)
+
+
+# Frontend: the built web/dist at /, or the "not built" page
+
+
+def test_frontend_served_at_root(sim_project: Path, frontend: Path) -> None:
+    client = TestClient(create_app(sim_project, frontend))
+
+    page = client.get("/")
+    asset = client.get("/assets/index-abc123.js")
+
+    assert page.status_code == 200
+    assert "ycov app" in page.text
+    assert page.headers["content-type"].startswith("text/html")
+    assert asset.status_code == 200
+    assert asset.text == "console.log('ycov')"
+
+
+def test_frontend_mount_does_not_hide_the_api(
+    sim_project: Path, frontend: Path
+) -> None:
+    # The mount at / matches every path, so it must come after the API routes
+    client = TestClient(create_app(sim_project, frontend))
+
+    response = client.get("/api/project")
+
+    assert response.status_code == 200
+    assert response.json()["chromosome"] == "chrY"
+
+
+def test_frontend_unknown_file_is_404(sim_project: Path, frontend: Path) -> None:
+    client = TestClient(create_app(sim_project, frontend))
+
+    assert client.get("/assets/missing.js").status_code == 404
+
+
+@pytest.mark.parametrize("given", ["none", "missing", "empty"])
+def test_not_built_page_without_frontend(
+    sim_project: Path, tmp_path: Path, given: str
+) -> None:
+    # No folder, a folder that does not exist (StaticFiles would raise) and a
+    # folder without index.html (failed build) all fall back to the page
+    frontend_dir = {"none": None, "missing": tmp_path / "dist", "empty": tmp_path}[
+        given
+    ]
+    client = TestClient(create_app(sim_project, frontend_dir))
+
+    page = client.get("/")
+
+    assert page.status_code == 200
+    assert "npm run build" in page.text
+    assert get_ok(client, "/api/project")["chromosome"] == "chrY"
+
+
+@pytest.mark.parametrize("with_frontend", [True, False])
+def test_api_docs_list_only_the_api(
+    sim_project: Path, frontend: Path, with_frontend: bool
+) -> None:
+    # Neither the mount nor the "not built" page belongs in /docs
+    client = TestClient(create_app(sim_project, frontend if with_frontend else None))
+
+    assert set(get_ok(client, "/openapi.json")["paths"]) == API_PATHS
 
 
 # GET /api/project
