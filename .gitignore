@@ -50,6 +50,8 @@ frontend/dist/
 *.tsbuildinfo
 .vite/
 npm-debug.log*
+web/dist/
+web/node_modules
 
 # editors and OS
 .vscode/*

@@ -10,10 +10,12 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
 
 from ycov.models import WINDOW_SIZE
 from ycov.project.handle_project import load_manifest, read_project
 from ycov.server import queries
+from ycov.server.not_built_page import add_not_built_page
 from ycov.server.schemas import (
     Coverage,
     Mode,
@@ -25,7 +27,9 @@ from ycov.server.schemas import (
 HOST = "127.0.0.1"
 
 
-def create_app(project_dir: Path) -> FastAPI:
+def create_app(
+    project_dir: Path, frontend_dir: Path | None = None, open_browser: bool = True
+) -> FastAPI:
     """Load the project once and return the app that serves it.
 
     Everything except /api/coverage is built here and served unchanged.
@@ -79,6 +83,12 @@ def create_app(project_dir: Path) -> FastAPI:
         )  # raises 422
         requested = parse_samples(samples_param, ids)
         return queries.coverage(coverage, requested, start, end, resolution, mode)
+
+    # mount static files
+    if frontend_dir is not None and (frontend_dir / "index.html").is_file():
+        app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+    else:
+        add_not_built_page(app)
 
     return app
 
