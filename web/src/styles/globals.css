@@ -1,130 +1,169 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+/* Shared design tokens and base styles of the ycov viewer, the only CSS file of the app.
+   Values come from ui_mockup.html, names follow shadcn/ui.
+   Colours stay hex/rgb: Plotly.js reads them via getComputedStyle and cannot parse oklch.
+   A new or renamed token must also be added to THEME in src/lib/utils.ts (cn() merging). */
 
+@import "tailwindcss";
+@import "tw-animate-css"; /* enter/exit animations of shadcn menus and selects */
+@import "shadcn/tailwind.css"; /* shadcn variants (data-open, data-disabled, …) and utilities */
+
+/* No dark mode: the .dark class is never set, so dark: classes in generated
+   shadcn files stay inactive instead of following the OS setting. */
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: "Geist Variable", sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
-
+/* ---------- 1. Colour tokens (runtime CSS variables) ---------- */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  color-scheme: light;
+
+  /* surfaces and text */
+  --background: #e8eaec; /* app canvas behind the panes       (mockup --bg) */
+  --foreground: #1d2125; /* main text                         (--ink) */
+  --card: #ffffff; /* pane background                          (--panel) */
+  --card-foreground: #1d2125;
+  --popover: #ffffff; /* dropdown and select menus */
+  --popover-foreground: #1d2125;
+  --muted: #f4f5f6; /* sticky header, row hover                (--panel-2) */
+  --muted-foreground: #5f676e; /* keys, secondary text, axis labels (--muted) */
+
+  /* lines and focus */
+  --border: #cdd1d5; /* pane and row separators                (--line) */
+  --input: #aeb4ba; /* control borders                          (--line-2) */
+  --ring: #2f6fb3; /* focus outline                             (--focus) */
+
+  /* controls */
+  --primary: #2f6fb3; /* rare emphasis, checked states */
+  --primary-foreground: #ffffff;
+  --secondary: #f4f5f7; /* default button                       (--btn) */
+  --secondary-hover: #e9ecef; /*                                  (--btn-hover) */
+  --secondary-foreground: #1d2125;
+  --accent: #d9e3ee; /* pressed button, menu item hover          (--btn-on) */
+  --accent-border: #8099b3; /*                                    (--btn-on-line) */
+  --accent-foreground: #1d2125;
+  --destructive: #c8501e; /* invalid input, errors                (--loss) */
+  --tooltip: #ffffe8; /* Plotly hover label                       (.tip) */
+
+  /* sequence classes: Okabe-Ito palette, colour-blind safe (NFR12) */
+  --seq-par: #cc79a7;
+  --seq-xtr: #e69f00;
+  --seq-xdr: #009e73;
+  --seq-ampl: #56b4e9;
+  --seq-pal: #7a5195; /* palindromes P1-P8, not in the bundled BED yet */
+  --seq-het: #8a8f8c; /* HET, CEN, SAT, DYZ* */
+  --seq-other: #c4c9cd; /* OTHER and unknown names */
+
+  /* named regions (AZFa/b/c, PAR1/2) */
+  --region: #5f676e;
+  --region-foreground: #ffffff;
+
+  /* region in view (red slider) */
+  --viewport: #d7263d; /*                                         (--vp) */
+  --viewport-fill: rgb(215 38 61 / 0.12);
+
+  /* coverage plot */
+  --coverage-line: #1d2125;
+  --coverage-fill: rgb(29 33 37 / 0.13);
+  --coverage-reference: #aeb4ba; /* dotted line at 1 copy */
+  --masked: rgb(95 103 110 / 0.16); /* gap and PAR shapes (FR59, simplified) */
+
+  /* heatmap scale, reserved for Phase 3 (mockup --loss / --normal / --gain) */
+  --coverage-loss: #c8501e;
+  --coverage-normal: #e2e6e1;
+  --coverage-gain: #2f5f9e;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* ---------- 2. Colour tokens -> Tailwind utilities (bg-*, text-*, border-*, fill-*, …) ---------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-border: var(--accent-border);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-tooltip: var(--tooltip);
+
+  --color-seq-par: var(--seq-par);
+  --color-seq-xtr: var(--seq-xtr);
+  --color-seq-xdr: var(--seq-xdr);
+  --color-seq-ampl: var(--seq-ampl);
+  --color-seq-pal: var(--seq-pal);
+  --color-seq-het: var(--seq-het);
+  --color-seq-other: var(--seq-other);
+
+  --color-region: var(--region);
+  --color-region-foreground: var(--region-foreground);
+  --color-viewport: var(--viewport);
+  --color-viewport-fill: var(--viewport-fill);
+  --color-masked: var(--masked);
 }
 
+/* ---------- 3. Fonts, sizes, layout (static theme values) ---------- */
+@theme {
+  /* system fonts only: works offline, nothing is downloaded (NFR1, NFR21) */
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-mono: Consolas, Menlo, "DejaVu Sans Mono", monospace;
+
+  /* font sizes: Tailwind's default scale is removed, only these exist */
+  --text-*: initial;
+  --text-caption: 0.6875rem; /* 11 px  axis ticks, lane labels */
+  --text-caption--line-height: 1.3;
+  --text-small: 0.75rem; /* 12 px  secondary info, small buttons, coordinates */
+  --text-small--line-height: 1.35;
+  --text-body: 0.8125rem; /* 13 px  default UI text, controls */
+  --text-body--line-height: 1.4;
+  --text-title: 0.875rem; /* 14 px  dialog titles (Phase 3) */
+  --text-title--line-height: 1.4;
+  --text-brand: 0.9375rem; /* 15 px  "ycov" logo */
+  --text-brand--line-height: 1.2;
+
+  /* named sizes -> h-control, w-sidebar, w-track-label, h-track-row */
+  --spacing-control: 1.625rem; /* 26 px  height of buttons, inputs, selects */
+  --spacing-sidebar: 15rem; /* 240 px sample sidebar column */
+  --spacing-track-label: 13.125rem; /* 210 px sample label column in the track panel */
+  --spacing-track-row: 7.5rem; /* 120 px one sample row (Plotly fills it) */
+
+  /* small radii of a desktop tool (mockup: 2 px) */
+  --radius-sm: 2px; /* controls, panes */
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 4px; /* menus */
+
+  --shadow-menu: 0 3px 8px rgb(0 0 0 / 0.15);
+  --inset-shadow-pressed: inset 0 1px 2px rgb(0 0 0 / 0.12);
+
+  --breakpoint-desktop: 61.25rem; /* 980 px: two-column layout from here (desktop:) */
+}
+
+/* ---------- 4. Base layer ---------- */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  html,
+  body,
+  #root {
+    height: 100%;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-body text-foreground antialiased;
   }
-  html {
-    @apply font-sans;
+  *,
+  ::before,
+  ::after {
+    @apply border-border;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
   }
 }
