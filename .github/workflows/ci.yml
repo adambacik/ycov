@@ -82,6 +82,10 @@ jobs:
         if: steps.check.outputs.exists == 'true'
         run: npm run lint
 
+      - name: Check formatting
+        if: steps.check.outputs.exists == 'true'
+        run: npm run format:check
+
       - name: Type check
         if: steps.check.outputs.exists == 'true'
         run: npx tsc --noEmit

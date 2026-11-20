@@ -49,10 +49,7 @@ export function getWindows(signal?: AbortSignal): Promise<WindowAnnotations> {
   return getJson("/api/windows", signal);
 }
 
-export function getCoverage(
-  query: CoverageQuery = {},
-  signal?: AbortSignal,
-): Promise<Coverage> {
+export function getCoverage(query: CoverageQuery = {}, signal?: AbortSignal): Promise<Coverage> {
   const params = new URLSearchParams();
   if (query.region) params.set("region", formatRegion(query.region));
   if (query.resolution !== undefined) params.set("resolution", String(query.resolution));
