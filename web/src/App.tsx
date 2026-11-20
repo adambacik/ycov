@@ -1,0 +1,67 @@
+import { useEffect, useState } from "react";
+import { getProject, getSamples } from "./api/client.ts";
+import type { ProjectInfo, SampleInfo } from "./api/types.ts";
+import "./App.css";
+
+/** What the app knows about the project: loading, failed, or loaded. */
+type Load =
+  | { status: "loading" }
+  | { status: "error"; message: string }
+  | { status: "ready"; project: ProjectInfo; samples: SampleInfo[] };
+
+export default function App() {
+  const [load, setLoad] = useState<Load>({ status: "loading" });
+
+  // Load once on start; abort if the component goes away (StrictMode in dev).
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    Promise.all([getProject(signal), getSamples(signal)])
+      .then(([project, samples]) => setLoad({ status: "ready", project, samples }))
+      .catch((error: unknown) => {
+        if (signal.aborted) return;
+        const message = error instanceof Error ? error.message : String(error);
+        setLoad({ status: "error", message });
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  if (load.status === "loading") {
+    return <p className="status">Loading project…</p>;
+  }
+  if (load.status === "error") {
+    return (
+      <p className="status error" role="alert">
+        Could not load the project: {load.message}
+      </p>
+    );
+  }
+
+  const { project, samples } = load;
+  return (
+    <>
+      <header className="topbar">
+        <strong>ycov</strong>
+        <span>{project.reference}</span>
+        <span>
+          {project.chromosome} · {formatBp(project.length)}
+        </span>
+        <span>{formatBp(project.window_size)} windows</span>
+        <span>{samples.length} samples</span>
+        <span className="muted">v{project.ycov_version}</span>
+      </header>
+      <main className="content">
+        <p className="muted">Heatmap goes here.</p>
+      </main>
+    </>
+  );
+}
+
+/** 62460029 -> "62.46 Mb", 1000 -> "1 kb". */
+function formatBp(bp: number): string {
+  if (bp >= 1_000_000) return `${(bp / 1_000_000).toFixed(2)} Mb`;
+  if (bp >= 1_000) return `${bp / 1_000} kb`;
+  return `${bp} bp`;
+}

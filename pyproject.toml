@@ -9,9 +9,11 @@ authors = [
 license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.163.1",
     "polars>=2.1.0",
     "rich>=15.0.0",
     "typer>=0.27.3",
+    "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
@@ -26,6 +28,7 @@ default-groups = ["dev", "scripts"]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "mypy>=2.4.0",
     "pandas-stubs>=3.1.0.261029",
     "pytest>=9.1.1",

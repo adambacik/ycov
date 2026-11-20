@@ -78,12 +78,20 @@ def view(
             help="Project folder made by ycov prepare", exists=False, file_okay=False
         ),
     ],
+    port: Annotated[
+        int,
+        typer.Option("--port", "-p", help="Port to connect to", min=1, max=65535),
+    ] = 8000,
+    no_browser: Annotated[
+        bool,
+        typer.Option("--no-browser", help="Do not open the browser automatically"),
+    ] = False,
 ) -> None:
     """Open a ycov project folder in the browser."""
     setup_logging()
 
     try:
-        view_project(project)
+        view_project(project, port, open_browser=not no_browser)
     except YcovInputError as error:
         typer.echo(f"Error: {error}", err=True)
         raise typer.Exit(code=1) from error
