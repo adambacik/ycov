@@ -18,7 +18,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+
+    // "@/..." -> "src/...", same alias as vite.config.ts and components.json
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src"]
 }
