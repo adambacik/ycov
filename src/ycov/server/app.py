@@ -41,7 +41,7 @@ def create_app(
 
     # build once
     ids = [s.id for s in samples]
-    project = queries.project_info(manifest)
+    project = queries.project_info(manifest, project_dir.resolve().name)
     annotations = queries.window_annotations(windows)
     samples_list = queries.sample_info(samples)
 
