@@ -12,7 +12,7 @@ import type {
   Region,
   SampleInfo,
   WindowAnnotations,
-} from "./types.ts";
+} from "@/api/types";
 
 /** A failed API call: HTTP status (0 = server not reachable) and a readable message. */
 export class ApiError extends Error {
