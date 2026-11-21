@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProject, getSamples } from "./api/client.ts";
 import type { ProjectInfo, SampleInfo } from "./api/types.ts";
+import { formatBp } from "@/lib/format";
 
 /** What the app knows about the project: loading, failed, or loaded. */
 type Load =
@@ -56,11 +57,4 @@ export default function App() {
       </main>
     </>
   );
-}
-
-/** 62460029 -> "62.46 Mb", 1000 -> "1 kb". */
-function formatBp(bp: number): string {
-  if (bp >= 1_000_000) return `${(bp / 1_000_000).toFixed(2)} Mb`;
-  if (bp >= 1_000) return `${bp / 1_000} kb`;
-  return `${bp} bp`;
 }

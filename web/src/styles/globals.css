@@ -111,7 +111,9 @@
 }
 
 /* ---------- 3. Fonts, sizes, layout (static theme values) ---------- */
-@theme {
+/* "static": always emit every variable on :root, also the ones no class uses yet, so
+   lib/theme.ts can read --font-mono and --text-caption for Plotly. */
+@theme static {
   /* system fonts only: works offline, nothing is downloaded (NFR1, NFR21) */
   --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
   --font-mono: Consolas, Menlo, "DejaVu Sans Mono", monospace;
