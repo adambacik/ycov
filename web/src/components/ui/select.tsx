@@ -31,7 +31,7 @@ function SelectTrigger({
       className={cn(
         "flex h-control w-fit items-center justify-between gap-1.5 rounded-sm border border-input " +
           "bg-card pr-1 pl-1.5 text-body whitespace-nowrap text-foreground select-none " +
-          "disabled:cursor-not-allowed disabled:opacity-50 data-placeholder:text-muted-foreground " +
+          "disabled:pointer-events-none disabled:opacity-50 data-placeholder:text-muted-foreground " +
           "*:data-[slot=select-value]:line-clamp-1 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className,
       )}
