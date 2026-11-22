@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
 
-import { formatBp, formatDepth, formatPosition, formatRegionLabel } from "@/lib/format";
+import {
+  formatBp,
+  formatDepth,
+  formatMbRange,
+  formatPosition,
+  formatRegionLabel,
+} from "@/lib/format";
 
 describe("formatBp", () => {
   test.each([
@@ -49,6 +55,16 @@ describe("formatRegionLabel", () => {
 
   test("a single base has the same start and end", () => {
     expect(formatRegionLabel("chrY", { start: 99, end: 100 })).toBe("chrY:100-100");
+  });
+});
+
+describe("formatMbRange", () => {
+  test("two decimals and an en dash", () => {
+    expect(formatMbRange({ start: 23_327_301, end: 27_020_249 })).toBe("23.33–27.02 Mb");
+  });
+
+  test("start of the chromosome", () => {
+    expect(formatMbRange({ start: 0, end: 2_458_320 })).toBe("0.00–2.46 Mb");
   });
 });
 

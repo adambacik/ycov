@@ -34,6 +34,14 @@ export function formatRegionLabel(chromosome: string, range: GenomeRange): strin
   return `${chromosome}:${formatPosition(range.start + 1)}-${formatPosition(range.end)}`;
 }
 
+/**
+ * Short range in Mb with 2 decimals, for list entries: { start: 23327301, end: 27020249 } ->
+ * "23.33–27.02 Mb". Too coarse to tell 0- from 1-based, so the start is shown as stored.
+ */
+export function formatMbRange(range: GenomeRange): string {
+  return `${(range.start / 1_000_000).toFixed(2)}–${(range.end / 1_000_000).toFixed(2)} Mb`;
+}
+
 /** Sequencing depth with one decimal: 30.14 -> "30.1×". */
 export function formatDepth(depth: number): string {
   return `${depth.toFixed(1)}×`;
