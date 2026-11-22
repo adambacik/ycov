@@ -1,5 +1,5 @@
 import { StatusMessage } from "@/components/common/StatusMessage";
-import { DataSummary } from "@/dev/DataSummary";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { useProjectLoader } from "@/hooks/useProjectLoader";
 import { ProjectDataProvider } from "@/state/projectData";
 
@@ -15,7 +15,7 @@ export function App() {
   }
   return (
     <ProjectDataProvider value={load.data}>
-      <DataSummary /> {/* replaced by <AppLayout /> in step 6 */}
+      <AppLayout />
     </ProjectDataProvider>
   );
 }
