@@ -133,7 +133,7 @@
 
   /* named sizes -> h-control, w-sidebar, w-track-label, h-track-row */
   --spacing-control: 1.625rem; /* 26 px  height of buttons, inputs, selects */
-  --spacing-sidebar: 15rem; /* 240 px sample sidebar column */
+  --spacing-sidebar: 16.75rem; /* 268 px sample sidebar column, fits "(500/500)" + buttons */
   --spacing-track-label: 13.125rem; /* 210 px sample label column in the track panel */
   --spacing-track-row: 7.5rem; /* 120 px one sample row (Plotly fills it) */
 
