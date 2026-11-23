@@ -61,6 +61,27 @@ export function resizeViewEnd(
   return { start: origin.start, end };
 }
 
+/** Which part of the viewport box is dragged: the box itself or one of its edges. */
+export type DragMode = "move" | "resize-start" | "resize-end";
+
+/** The view after dragging a part of the box by deltaBp since the pointer went down. */
+export function dragView(
+  mode: DragMode,
+  origin: GenomeRange,
+  deltaBp: number,
+  bounds: GenomeRange,
+  minSpan: number,
+): GenomeRange {
+  switch (mode) {
+    case "move":
+      return moveView(origin, deltaBp, bounds);
+    case "resize-start":
+      return resizeViewStart(origin, deltaBp, bounds, minSpan);
+    case "resize-end":
+      return resizeViewEnd(origin, deltaBp, bounds, minSpan);
+  }
+}
+
 /** Same span, centred on position; near an edge it stops at the edge (not centred then). */
 export function centreViewOn(
   view: GenomeRange,

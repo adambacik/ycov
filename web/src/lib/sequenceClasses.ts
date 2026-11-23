@@ -13,16 +13,53 @@ interface GroupStyle {
   fillClass: string;
   /** HTML swatches (legend in Phase 3) */
   bgClass: string;
+  /** SVG text on the bar: white on dark colours, dark on light ones (mockup `lum`) */
+  labelClass: string;
 }
 
 export const SEQUENCE_CLASS_GROUPS: Record<SequenceClassGroup, GroupStyle> = {
-  par: { label: "Pseudoautosomal", fillClass: "fill-seq-par", bgClass: "bg-seq-par" },
-  xtr: { label: "X-transposed", fillClass: "fill-seq-xtr", bgClass: "bg-seq-xtr" },
-  xdr: { label: "X-degenerate", fillClass: "fill-seq-xdr", bgClass: "bg-seq-xdr" },
-  ampl: { label: "Ampliconic", fillClass: "fill-seq-ampl", bgClass: "bg-seq-ampl" },
-  pal: { label: "Palindrome", fillClass: "fill-seq-pal", bgClass: "bg-seq-pal" },
-  het: { label: "Heterochromatin / satellite", fillClass: "fill-seq-het", bgClass: "bg-seq-het" },
-  other: { label: "Other", fillClass: "fill-seq-other", bgClass: "bg-seq-other" },
+  par: {
+    label: "Pseudoautosomal",
+    fillClass: "fill-seq-par",
+    bgClass: "bg-seq-par",
+    labelClass: "fill-foreground",
+  },
+  xtr: {
+    label: "X-transposed",
+    fillClass: "fill-seq-xtr",
+    bgClass: "bg-seq-xtr",
+    labelClass: "fill-foreground",
+  },
+  xdr: {
+    label: "X-degenerate",
+    fillClass: "fill-seq-xdr",
+    bgClass: "bg-seq-xdr",
+    labelClass: "fill-card",
+  },
+  ampl: {
+    label: "Ampliconic",
+    fillClass: "fill-seq-ampl",
+    bgClass: "bg-seq-ampl",
+    labelClass: "fill-foreground",
+  },
+  pal: {
+    label: "Palindrome",
+    fillClass: "fill-seq-pal",
+    bgClass: "bg-seq-pal",
+    labelClass: "fill-card",
+  },
+  het: {
+    label: "Heterochromatin / satellite",
+    fillClass: "fill-seq-het",
+    bgClass: "bg-seq-het",
+    labelClass: "fill-foreground",
+  },
+  other: {
+    label: "Other",
+    fillClass: "fill-seq-other",
+    bgClass: "bg-seq-other",
+    labelClass: "fill-foreground",
+  },
 };
 
 /**

@@ -1,7 +1,14 @@
 import { describe, expect, test } from "vitest";
 
 import type { GenomeRange } from "@/lib/genome";
-import { centreViewOn, clampView, moveView, resizeViewEnd, resizeViewStart } from "@/lib/viewRange";
+import {
+  centreViewOn,
+  clampView,
+  dragView,
+  moveView,
+  resizeViewEnd,
+  resizeViewStart,
+} from "@/lib/viewRange";
 import { CHRY_LENGTH } from "@/test/annotations";
 
 const BOUNDS = { start: 0, end: CHRY_LENGTH };
@@ -166,5 +173,28 @@ describe("centreViewOn", () => {
     const centred = centreViewOn(VIEW, position, BOUNDS);
     expect(span(centred)).toBe(span(VIEW));
     expectValid(centred);
+  });
+});
+
+describe("dragView", () => {
+  test("move shifts both edges", () => {
+    expect(dragView("move", VIEW, 1_000_000, BOUNDS, MIN)).toEqual({
+      start: 11_000_000,
+      end: 21_000_000,
+    });
+  });
+
+  test("resize-start shifts only the left edge", () => {
+    expect(dragView("resize-start", VIEW, 1_000_000, BOUNDS, MIN)).toEqual({
+      start: 11_000_000,
+      end: 20_000_000,
+    });
+  });
+
+  test("resize-end shifts only the right edge", () => {
+    expect(dragView("resize-end", VIEW, 1_000_000, BOUNDS, MIN)).toEqual({
+      start: 10_000_000,
+      end: 21_000_000,
+    });
   });
 });

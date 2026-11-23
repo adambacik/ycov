@@ -5,6 +5,7 @@ import {
   formatDepth,
   formatMbRange,
   formatPosition,
+  formatRange,
   formatRegionLabel,
 } from "@/lib/format";
 
@@ -39,6 +40,12 @@ describe("formatPosition", () => {
     [2_458_321.6, "2,458,322"],
   ])("%d -> %s", (position, expected) => {
     expect(formatPosition(position)).toBe(expected);
+  });
+});
+
+describe("formatRange", () => {
+  test("0-based half-open range -> 1-based inclusive coordinates", () => {
+    expect(formatRange({ start: 2_458_320, end: 2_727_072 })).toBe("2,458,321-2,727,072");
   });
 });
 

@@ -26,12 +26,20 @@ export function formatPosition(position: number): string {
 }
 
 /**
- * Region as the user writes it, 1-based and inclusive (like IGV and samtools):
- * ("chrY", { start: 2458320, end: 27020249 }) -> "chrY:2,458,321-27,020,249".
+ * Coordinates of a range, 1-based and inclusive (like IGV and samtools):
+ * { start: 2458320, end: 27020249 } -> "2,458,321-27,020,249".
  * The range is 0-based half-open, so only the start moves by one.
  */
+export function formatRange(range: GenomeRange): string {
+  return `${formatPosition(range.start + 1)}-${formatPosition(range.end)}`;
+}
+
+/**
+ * Region as the user writes it, 1-based and inclusive:
+ * ("chrY", { start: 2458320, end: 27020249 }) -> "chrY:2,458,321-27,020,249".
+ */
 export function formatRegionLabel(chromosome: string, range: GenomeRange): string {
-  return `${chromosome}:${formatPosition(range.start + 1)}-${formatPosition(range.end)}`;
+  return `${chromosome}:${formatRange(range)}`;
 }
 
 /**
