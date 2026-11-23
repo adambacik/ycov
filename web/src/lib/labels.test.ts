@@ -57,7 +57,7 @@ describe("placeTickLabels", () => {
   });
 
   test("drops a moved label that runs into its neighbour, on both edges", () => {
-    // 8 characters = 52 px, ticks 60 px apart: the centred labels fit, the moved ones do not
+    // 8 characters = 54 px, ticks 60 px apart: the centred labels fit, the moved ones do not
     const ticks = [0, 250, 500, 750, 1_000].map((position) => ({ position, label: "15.25 Mb" }));
     const placed = placeTickLabels(ticks, domain, 240);
     expect(placed.map((label) => label.position)).toEqual([250, 500, 750]);

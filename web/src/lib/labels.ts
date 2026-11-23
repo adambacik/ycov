@@ -6,8 +6,8 @@
 import { toPercent, type GenomeRange } from "@/lib/genome";
 import type { AxisTick } from "@/lib/ticks";
 
-/** Average character width in px of the caption font size (11 px), sans and mono. */
-const CAPTION_CHAR_WIDTH = 6.5;
+/** Average character width in px at caption size (11 px): mono fonts 6.05-6.62, sans about 6.6. */
+const CAPTION_CHAR_WIDTH = 6.7;
 
 /** Free space in px on each side of a label inside its bar, and between bar and label. */
 export const LABEL_PADDING = 4;
