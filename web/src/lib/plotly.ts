@@ -2,8 +2,11 @@
  * The one Plotly import of the app plus the look shared by all plots: fonts, colours, margins
  * and interaction settings, so every plot (coverage rows now, Phase 3 cohort plots later)
  * looks the same. Colours and fonts come from the CSS tokens via lib/theme.ts.
+ *
+ * The basic bundle has only scatter, bar and pie: the full one needs about 3 s to start in Chrome
+ * (NFR3). Box plots or heatmaps need plotly.js-cartesian-dist-min instead.
  */
-import Plotly from "plotly.js-dist-min";
+import Plotly from "plotly.js-basic-dist-min";
 import type { Config, Layout, LayoutAxis } from "plotly.js";
 
 import { PLOT_MARGIN } from "@/lib/constants";

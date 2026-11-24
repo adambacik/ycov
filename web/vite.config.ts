@@ -33,8 +33,8 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    // plotly.js-dist-min alone is ~4.5 MB; local app, so a single big chunk is fine.
-    chunkSizeWarningLimit: 6000,
+    // plotly.js-basic-dist-min alone is ~1.2 MB; local app, so a single big chunk is fine.
+    chunkSizeWarningLimit: 2000,
   },
 
   // `npm test`: unit tests of the pure helpers in src/lib/, no browser (DOM) needed.
