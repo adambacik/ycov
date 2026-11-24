@@ -63,7 +63,9 @@
   --coverage-line: #1d2125;
   --coverage-fill: rgb(29 33 37 / 0.13);
   --coverage-reference: #aeb4ba; /* dotted line at 1 copy */
-  --masked: rgb(95 103 110 / 0.16); /* gap and PAR shapes (FR59, simplified) */
+  --masked: #f4f5f6; /* gap and PAR: background of the pattern (FR59) */
+  --masked-par: var(--seq-par); /* dots over a PAR              (mockup .napar) */
+  --masked-gap: rgb(95 103 110 / 0.6); /* hatch over a gap       (mockup .hatch) */
 
   /* heatmap scale, reserved for Phase 3 (mockup --loss / --normal / --gain) */
   --coverage-loss: #c8501e;
@@ -108,6 +110,8 @@
   --color-viewport: var(--viewport);
   --color-viewport-fill: var(--viewport-fill);
   --color-masked: var(--masked);
+  --color-masked-par: var(--masked-par);
+  --color-masked-gap: var(--masked-gap);
 }
 
 /* ---------- 3. Fonts, sizes, layout (static theme values) ---------- */
