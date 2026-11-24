@@ -20,8 +20,9 @@ class Schema(BaseModel):
 
 
 class ProjectInfo(Schema):
-    """GET /api/project: the manifest, for the top bar and the compatibility check."""
+    """GET /api/project: the manifest with project folder name, for the top bar and the compatibility check."""
 
+    name: str = Field(description="project folder name", examples=["project"])
     ycov_version: str = Field(description="ycov version that wrote the project")
     created: str = Field(description="creation time, ISO 8601 UTC")
     reference: str = Field(examples=["T2T-CHM13v2.0"])

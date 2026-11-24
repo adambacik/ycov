@@ -1,8 +1,9 @@
 name: CI
 
+# every push to any branch; pull requests also test the result of the merge
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
 
 # cancel an older run of the same branch / PR when a new commit is pushed
@@ -44,9 +45,17 @@ jobs:
       - name: Type check
         run: uv run mypy src tests
 
-      # add --cov-fail-under=70 once there is real code (NFR18)
+      # at least 70 % coverage (NFR18)
       - name: Test
-        run: uv run pytest --cov=ycov --cov-report=term-missing
+        run: uv run pytest --cov=ycov --cov-report=term-missing --cov-fail-under=70
+
+      # coverage table on the summary page of the run, also when the limit is missed
+      - name: Coverage summary
+        if: ${{ !cancelled() }}
+        run: |
+          [ -f .coverage ] || exit 0 # an earlier step failed, no tests were run
+          echo "### Coverage, Python ${{ matrix.python-version }}" >> "$GITHUB_STEP_SUMMARY"
+          uv run coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
 
   # job 2: frontend
   web:
@@ -59,15 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # skips the job until web/ is scaffolded with Vite
-      - name: Check for frontend
-        id: check
-        run: |
-          if [ -f package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"
-          else echo "exists=false" >> "$GITHUB_OUTPUT"; echo "web/package.json not found, skipping"; fi
-
       - name: Install Node.js
-        if: steps.check.outputs.exists == 'true'
         uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -75,21 +76,19 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Install dependencies
-        if: steps.check.outputs.exists == 'true'
         run: npm ci
 
       - name: Lint
-        if: steps.check.outputs.exists == 'true'
         run: npm run lint
 
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Type check
-        if: steps.check.outputs.exists == 'true'
         run: npx tsc --noEmit
 
       - name: Test
-        if: steps.check.outputs.exists == 'true'
         run: npm test -- --run
 
       - name: Build
-        if: steps.check.outputs.exists == 'true'
         run: npm run build

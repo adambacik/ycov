@@ -1,0 +1,175 @@
+/* Shared design tokens and base styles of the ycov viewer, the only CSS file of the app.
+   Values come from ui_mockup.html, names follow shadcn/ui.
+   Colours stay hex/rgb: Plotly.js reads them via getComputedStyle and cannot parse oklch.
+   A new or renamed token must also be added to THEME in src/lib/utils.ts (cn() merging). */
+
+@import "tailwindcss";
+@import "tw-animate-css"; /* enter/exit animations of shadcn menus and selects */
+@import "shadcn/tailwind.css"; /* shadcn variants (data-open, data-disabled, …) and utilities */
+
+/* No dark mode: the .dark class is never set, so dark: classes in generated
+   shadcn files stay inactive instead of following the OS setting. */
+@custom-variant dark (&:is(.dark *));
+
+/* ---------- 1. Colour tokens (runtime CSS variables) ---------- */
+:root {
+  color-scheme: light;
+
+  /* surfaces and text */
+  --background: #e8eaec; /* app canvas behind the panes       (mockup --bg) */
+  --foreground: #1d2125; /* main text                         (--ink) */
+  --card: #ffffff; /* pane background                          (--panel) */
+  --card-foreground: #1d2125;
+  --popover: #ffffff; /* dropdown and select menus */
+  --popover-foreground: #1d2125;
+  --muted: #f4f5f6; /* sticky header, row hover                (--panel-2) */
+  --muted-foreground: #5f676e; /* keys, secondary text, axis labels (--muted) */
+
+  /* lines and focus */
+  --border: #cdd1d5; /* pane and row separators                (--line) */
+  --input: #aeb4ba; /* control borders                          (--line-2) */
+  --ring: #2f6fb3; /* focus outline                             (--focus) */
+
+  /* controls */
+  --primary: #2f6fb3; /* rare emphasis, checked states */
+  --primary-foreground: #ffffff;
+  --secondary: #f4f5f7; /* default button                       (--btn) */
+  --secondary-hover: #e9ecef; /*                                  (--btn-hover) */
+  --secondary-foreground: #1d2125;
+  --accent: #d9e3ee; /* pressed button, menu item hover          (--btn-on) */
+  --accent-border: #8099b3; /*                                    (--btn-on-line) */
+  --accent-foreground: #1d2125;
+  --destructive: #c8501e; /* invalid input, errors                (--loss) */
+  --tooltip: #ffffe8; /* Plotly hover label                       (.tip) */
+
+  /* sequence classes: Okabe-Ito palette, colour-blind safe (NFR12) */
+  --seq-par: #cc79a7;
+  --seq-xtr: #e69f00;
+  --seq-xdr: #009e73;
+  --seq-ampl: #56b4e9;
+  --seq-pal: #7a5195; /* palindromes P1-P8, not in the bundled BED yet */
+  --seq-het: #8a8f8c; /* HET, CEN, SAT, DYZ* */
+  --seq-other: #c4c9cd; /* OTHER and unknown names */
+
+  /* named regions (AZFa/b/c, PAR1/2) */
+  --region: #5f676e;
+  --region-foreground: #ffffff;
+
+  /* region in view (red slider) */
+  --viewport: #d7263d; /*                                         (--vp) */
+  --viewport-fill: rgb(215 38 61 / 0.12);
+
+  /* coverage plot */
+  --coverage-line: #1d2125;
+  --coverage-fill: rgb(29 33 37 / 0.13);
+  --coverage-reference: #aeb4ba; /* dotted line at 1 copy */
+  --masked: #f4f5f6; /* gap and PAR: background of the pattern (FR59) */
+  --masked-par: var(--seq-par); /* dots over a PAR              (mockup .napar) */
+  --masked-gap: rgb(95 103 110 / 0.6); /* hatch over a gap       (mockup .hatch) */
+
+  /* heatmap scale, reserved for Phase 3 (mockup --loss / --normal / --gain) */
+  --coverage-loss: #c8501e;
+  --coverage-normal: #e2e6e1;
+  --coverage-gain: #2f5f9e;
+}
+
+/* ---------- 2. Colour tokens -> Tailwind utilities (bg-*, text-*, border-*, fill-*, …) ---------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-border: var(--accent-border);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-tooltip: var(--tooltip);
+
+  --color-seq-par: var(--seq-par);
+  --color-seq-xtr: var(--seq-xtr);
+  --color-seq-xdr: var(--seq-xdr);
+  --color-seq-ampl: var(--seq-ampl);
+  --color-seq-pal: var(--seq-pal);
+  --color-seq-het: var(--seq-het);
+  --color-seq-other: var(--seq-other);
+
+  --color-region: var(--region);
+  --color-region-foreground: var(--region-foreground);
+  --color-viewport: var(--viewport);
+  --color-viewport-fill: var(--viewport-fill);
+  --color-masked: var(--masked);
+  --color-masked-par: var(--masked-par);
+  --color-masked-gap: var(--masked-gap);
+}
+
+/* ---------- 3. Fonts, sizes, layout (static theme values) ---------- */
+/* "static": always emit every variable on :root, also the ones no class uses yet, so
+   lib/theme.ts can read --font-mono and --text-caption for Plotly. */
+@theme static {
+  /* system fonts only: works offline, nothing is downloaded (NFR1, NFR21) */
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-mono: Consolas, Menlo, "DejaVu Sans Mono", monospace;
+
+  /* font sizes: Tailwind's default scale is removed, only these exist */
+  --text-*: initial;
+  --text-caption: 0.6875rem; /* 11 px  axis ticks, lane labels */
+  --text-caption--line-height: 1.3;
+  --text-small: 0.75rem; /* 12 px  secondary info, small buttons, coordinates */
+  --text-small--line-height: 1.35;
+  --text-body: 0.8125rem; /* 13 px  default UI text, controls */
+  --text-body--line-height: 1.4;
+  --text-title: 0.875rem; /* 14 px  dialog titles (Phase 3) */
+  --text-title--line-height: 1.4;
+  --text-brand: 0.9375rem; /* 15 px  "ycov" logo */
+  --text-brand--line-height: 1.2;
+
+  /* named sizes -> h-control, w-sidebar, w-track-label, h-track-row */
+  --spacing-control: 1.625rem; /* 26 px  height of buttons, inputs, selects */
+  --spacing-sidebar: 16.75rem; /* 268 px sample sidebar column, fits "(500/500)" + buttons */
+  --spacing-track-label: 13.125rem; /* 210 px sample label column in the track panel */
+  --spacing-track-row: 7.5rem; /* 120 px one sample row (Plotly fills it) */
+
+  /* small radii of a desktop tool (mockup: 2 px) */
+  --radius-sm: 2px; /* controls, panes */
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 4px; /* menus */
+
+  --shadow-menu: 0 3px 8px rgb(0 0 0 / 0.15);
+  --inset-shadow-pressed: inset 0 1px 2px rgb(0 0 0 / 0.12);
+
+  --breakpoint-desktop: 61.25rem; /* 980 px: two-column layout from here (desktop:) */
+}
+
+/* ---------- 4. Base layer ---------- */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-body text-foreground antialiased;
+  }
+  *,
+  ::before,
+  ::after {
+    @apply border-border;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+  }
+}

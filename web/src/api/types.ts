@@ -11,6 +11,7 @@ export type Mode = "rel_copy" | "depth";
 
 /** GET /api/project: the manifest. */
 export interface ProjectInfo {
+  name: string;
   ycov_version: string;
   /** creation time, ISO 8601 UTC */
   created: string;

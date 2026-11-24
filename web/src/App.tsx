@@ -1,67 +1,21 @@
-import { useEffect, useState } from "react";
-import { getProject, getSamples } from "./api/client.ts";
-import type { ProjectInfo, SampleInfo } from "./api/types.ts";
-import "./App.css";
+import { StatusMessage } from "@/components/common/StatusMessage";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { useProjectLoader } from "@/hooks/useProjectLoader";
+import { ProjectDataProvider } from "@/state/projectData";
 
-/** What the app knows about the project: loading, failed, or loaded. */
-type Load =
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "ready"; project: ProjectInfo; samples: SampleInfo[] };
-
-export default function App() {
-  const [load, setLoad] = useState<Load>({ status: "loading" });
-
-  // Load once on start; abort if the component goes away (StrictMode in dev).
-  useEffect(() => {
-    const controller = new AbortController();
-    const { signal } = controller;
-
-    Promise.all([getProject(signal), getSamples(signal)])
-      .then(([project, samples]) => setLoad({ status: "ready", project, samples }))
-      .catch((error: unknown) => {
-        if (signal.aborted) return;
-        const message = error instanceof Error ? error.message : String(error);
-        setLoad({ status: "error", message });
-      });
-
-    return () => controller.abort();
-  }, []);
+/** Loads the project once, shows loading/error until it is there, then the viewer. */
+export function App() {
+  const load = useProjectLoader();
 
   if (load.status === "loading") {
-    return <p className="status">Loading project…</p>;
+    return <StatusMessage>Loading project…</StatusMessage>;
   }
   if (load.status === "error") {
-    return (
-      <p className="status error" role="alert">
-        Could not load the project: {load.message}
-      </p>
-    );
+    return <StatusMessage tone="error">Could not load the project: {load.message}</StatusMessage>;
   }
-
-  const { project, samples } = load;
   return (
-    <>
-      <header className="topbar">
-        <strong>ycov</strong>
-        <span>{project.reference}</span>
-        <span>
-          {project.chromosome} · {formatBp(project.length)}
-        </span>
-        <span>{formatBp(project.window_size)} windows</span>
-        <span>{samples.length} samples</span>
-        <span className="muted">v{project.ycov_version}</span>
-      </header>
-      <main className="content">
-        <p className="muted">Heatmap goes here.</p>
-      </main>
-    </>
+    <ProjectDataProvider value={load.data}>
+      <AppLayout />
+    </ProjectDataProvider>
   );
-}
-
-/** 62460029 -> "62.46 Mb", 1000 -> "1 kb". */
-function formatBp(bp: number): string {
-  if (bp >= 1_000_000) return `${(bp / 1_000_000).toFixed(2)} Mb`;
-  if (bp >= 1_000) return `${bp / 1_000} kb`;
-  return `${bp} bp`;
 }

@@ -27,12 +27,13 @@ BIN = "bin"
 ORDER = "order"
 
 
-def project_info(manifest: dict[str, Any]) -> ProjectInfo:
-    """The manifest as /api/project returns it, without its file and sample lists.
+def project_info(manifest: dict[str, Any], project_name: str) -> ProjectInfo:
+    """The manifest with project folder name as /api/project returns it, without its file and sample lists.
 
     Chromosome and length are not in the manifest yet, they are the CHM13 chrY.
     """
     return ProjectInfo(
+        name=project_name,
         ycov_version=manifest["ycov_version"],
         created=manifest["created"],
         reference=manifest["reference"],
