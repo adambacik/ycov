@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useRef,
   type KeyboardEvent,
   type PointerEvent,
@@ -7,9 +6,10 @@ import {
   type RefObject,
 } from "react";
 
+import { useViewDrag } from "@/hooks/useViewDrag";
 import { MIN_VIEW_SPAN } from "@/lib/constants";
 import { formatRegionLabel } from "@/lib/format";
-import { toPercent, type GenomeRange } from "@/lib/genome";
+import { toPercent } from "@/lib/genome";
 import { centreViewOn, dragView, moveView, type DragMode } from "@/lib/viewRange";
 import { useProjectData } from "@/state/projectData";
 import { useViewStore } from "@/state/viewStore";
@@ -17,15 +17,6 @@ import { useViewStore } from "@/state/viewStore";
 /** Arrow key steps as a share of the span in view. */
 const KEY_STEP = 0.1;
 const KEY_STEP_SHIFT = 0.5;
-
-/** What a drag needs to know from its pointerdown; constant until the pointer is released. */
-interface Drag {
-  pointerId: number;
-  mode: DragMode;
-  originX: number;
-  originView: GenomeRange;
-  bpPerPx: number;
-}
 
 interface ViewportSliderProps {
   /** the drawing of the whole chromosome, ending with the GenomeAxis */
@@ -51,33 +42,14 @@ export function ViewportSlider({ children }: ViewportSliderProps) {
   const startHandleRef = useRef<HTMLDivElement>(null);
   const endHandleRef = useRef<HTMLDivElement>(null);
 
-  // refs, not state: nothing to re-render per pointer event
-  const dragRef = useRef<Drag | null>(null);
-  const pendingRef = useRef<GenomeRange | null>(null); // latest view, not in the store yet
-  const frameRef = useRef(0); // requested animation frame, 0 = none
-
-  /** Put the latest dragged view into the store now. */
-  function flush() {
-    cancelAnimationFrame(frameRef.current);
-    frameRef.current = 0;
-    if (pendingRef.current !== null) setView(pendingRef.current);
-    pendingRef.current = null;
-  }
-
-  useEffect(
-    () => () => {
-      cancelAnimationFrame(frameRef.current);
-      frameRef.current = 0;
-    },
-    [],
-  );
+  const drag = useViewDrag();
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
     const ruler = rulerRef.current;
     const box = boxRef.current;
     if (ruler === null || box === null) return;
     // main button only; a second finger does not take over a running drag
-    if (event.button !== 0 || dragRef.current !== null) return;
+    if (event.button !== 0 || drag.isDragging()) return;
     event.preventDefault();
 
     const rect = ruler.getBoundingClientRect();
@@ -100,38 +72,17 @@ export function ViewportSlider({ children }: ViewportSliderProps) {
       setView(originView);
     }
 
-    dragRef.current = {
-      pointerId: event.pointerId,
-      mode,
-      originX: event.clientX,
-      originView,
-      bpPerPx,
-    };
-    captureTarget.setPointerCapture(event.pointerId);
+    drag.start(event, captureTarget, (deltaPx) =>
+      dragView(mode, originView, deltaPx * bpPerPx, bounds, MIN_VIEW_SPAN),
+    );
     // preventDefault also stops the focus; arrow keys should work after a click
     box.focus({ preventScroll: true, focusVisible: false });
-  }
-
-  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-    const drag = dragRef.current;
-    if (drag === null || event.pointerId !== drag.pointerId) return;
-    // always from the origin plus the total distance, so the box does not drift
-    const deltaBp = (event.clientX - drag.originX) * drag.bpPerPx;
-    pendingRef.current = dragView(drag.mode, drag.originView, deltaBp, bounds, MIN_VIEW_SPAN);
-    // at most one store update, i.e. one relayout of every plot, per frame
-    if (frameRef.current === 0) frameRef.current = requestAnimationFrame(flush);
-  }
-
-  function handlePointerEnd(event: PointerEvent<HTMLDivElement>) {
-    if (event.pointerId !== dragRef.current?.pointerId) return;
-    dragRef.current = null;
-    flush(); // do not lose the last move before the release
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     if (event.altKey || event.ctrlKey || event.metaKey) return; // browser shortcuts (Alt+← = back)
-    if (dragRef.current !== null) return; // the next pointermove would undo it
+    if (drag.isDragging()) return; // the next pointermove would undo it
     event.preventDefault();
     const direction = event.key === "ArrowLeft" ? -1 : 1;
     const step = (view.end - view.start) * (event.shiftKey ? KEY_STEP_SHIFT : KEY_STEP);
@@ -146,9 +97,7 @@ export function ViewportSlider({ children }: ViewportSliderProps) {
       ref={rulerRef}
       className="relative cursor-pointer touch-none select-none"
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerEnd}
-      onPointerCancel={handlePointerEnd}
+      {...drag.handlers}
     >
       {children}
       {/* 3 px higher and lower than the 18 px class bar. Placed from the bottom (axis 26 px + gap

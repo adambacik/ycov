@@ -8,6 +8,7 @@ import {
   moveView,
   resizeViewEnd,
   resizeViewStart,
+  zoomView,
 } from "@/lib/viewRange";
 import { CHRY_LENGTH } from "@/test/annotations";
 
@@ -95,6 +96,38 @@ describe("moveView", () => {
       start: CHRY_LENGTH - 10_000_000,
       end: CHRY_LENGTH,
     });
+  });
+});
+
+describe("zoomView", () => {
+  test.each([0.5, 2, 0.001, 1000, 1])("factor %d: view valid", (factor) => {
+    expectValid(zoomView(VIEW, factor, BOUNDS, MIN));
+  });
+
+  test("in and out around the centre", () => {
+    expect(zoomView(VIEW, 0.5, BOUNDS, MIN)).toEqual({ start: 12_500_000, end: 17_500_000 });
+    expect(zoomView(VIEW, 2, BOUNDS, MIN)).toEqual({ start: 5_000_000, end: 25_000_000 });
+  });
+
+  test("in stops at minSpan, out at the whole chromosome", () => {
+    expect(span(zoomView(VIEW, 1e-6, BOUNDS, MIN))).toBe(MIN);
+    expect(zoomView(VIEW, 1e6, BOUNDS, MIN)).toEqual(BOUNDS);
+  });
+
+  test("out near an edge: shifted inside, span still doubled", () => {
+    expect(zoomView({ start: 0, end: 4_000_000 }, 2, BOUNDS, MIN)).toEqual({
+      start: 0,
+      end: 8_000_000,
+    });
+    const end = { start: CHRY_LENGTH - 4_000_000, end: CHRY_LENGTH };
+    expect(zoomView(end, 2, BOUNDS, MIN)).toEqual({
+      start: CHRY_LENGTH - 8_000_000,
+      end: CHRY_LENGTH,
+    });
+  });
+
+  test("in then out returns to the same view", () => {
+    expect(zoomView(zoomView(VIEW, 0.5, BOUNDS, MIN), 2, BOUNDS, MIN)).toEqual(VIEW);
   });
 });
 

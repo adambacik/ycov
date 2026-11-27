@@ -1,5 +1,5 @@
 /**
- * Pure operations on the region in view (viewport slider, later zoom/move buttons). Every
+ * Pure operations on the region in view (viewport slider, track header, nav buttons). Every
  * function returns a valid view: whole bases, inside bounds, at least minSpan long. The slider
  * always starts from the view at pointerdown plus the total drag distance (never step by
  * step), so rounding does not add up and the box does not drift.
@@ -34,6 +34,22 @@ export function clampView(view: GenomeRange, bounds: GenomeRange, minSpan: numbe
 export function moveView(origin: GenomeRange, deltaBp: number, bounds: GenomeRange): GenomeRange {
   const span = origin.end - origin.start;
   const start = shiftInto(Math.round(origin.start + deltaBp), span, bounds);
+  return { start, end: start + span };
+}
+
+/**
+ * Zoom around the centre of the view: span times factor (< 1 = in, > 1 = out), limited to
+ * [minSpan, bounds length]. Near an edge it is shifted inside, so the centre moves then.
+ */
+export function zoomView(
+  origin: GenomeRange,
+  factor: number,
+  bounds: GenomeRange,
+  minSpan: number,
+): GenomeRange {
+  const span = limitSpan(Math.round((origin.end - origin.start) * factor), bounds, minSpan);
+  const centre = (origin.start + origin.end) / 2;
+  const start = shiftInto(Math.round(centre - span / 2), span, bounds);
   return { start, end: start + span };
 }
 
