@@ -4,8 +4,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Text input (mockup `input[type=text]`): white, mono font for coordinates. aria-invalid draws
- * the red error border (mockup `input.bad`). Disabled keeps the text readable, because the
- * Phase 2 region input is disabled but still shows the current region.
+ * the red error border (mockup `input.bad`). Disabled keeps the text readable.
  */
 function Input({ className, type = "text", ...props }: ComponentProps<"input">) {
   return (
